@@ -1,0 +1,476 @@
+/* Base générale */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fc;
+    color: #333;
+    display: flex;
+    height: 100vh;
+}
+
+/* === Drawer (Menu latéral) === */
+.drawer {
+    width: 240px;
+    background-color: #1e293b; /* اللون الداكن */
+    color: white;
+    height: 100%;
+    position: fixed;
+    top: 60px; /* مكانه بعد الشريط العلوي */
+    left: -240px;
+    transition: left 0.3s ease-in-out;
+    z-index: 100;
+    padding-top: 20px;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.drawer.open {
+    left: 0;
+}
+
+.drawer ul {
+    list-style: none;
+    padding: 0;
+}
+
+.drawer li {
+    padding: 15px 20px;
+}
+
+.drawer a {
+    color: #cbd5e1;
+    text-decoration: none;
+    display: block;
+}
+
+.drawer a:hover {
+    background-color: #334155;
+    border-left: 4px solid #3b82f6;
+    color: white;
+}
+
+/* === Header (الشريط العلوي) === */
+header {
+    width: 100%;
+    height: 60px;
+    background-color: #1e293b; /* نفس اللون الداكن */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 900;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease-in-out; /* إضافة التأثير */
+}
+
+header.shift {
+    transform: translateX(240px); /* تحريك الشريط العلوي لليمين بالتزامن مع فتح الـ drawer */
+}
+
+/* === Contenu principal === */
+.main-content {
+    margin-left: 0;
+    margin-top: 60px;
+    padding: 20px;
+    flex: 1;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.drawer.open ~ .main-content {
+    margin-left: 240px;
+}
+
+/* === Titres & Tables === */
+h2 {
+    margin-bottom: 20px;
+    font-size: 28px;
+    text-align: center;
+    color: #1e293b;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.data-table th, .data-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.data-table th {
+    background-color: #f1f5f9;
+}
+
+/* === Boutons === */
+.btn-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+button {
+    background-color: #3b82f6;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    margin: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background-color: #2563eb;
+}
+
+button.active {
+    background-color: #1d4ed8;
+    font-weight: bold;
+}
+
+/* === Graphique === */
+.chart-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    overflow-x: auto;
+}
+
+#myChart {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100%;
+    display: block;
+}
+
+/* === Liste pourcentages === */
+#textList {
+    width: 100%;
+    max-width: 600px;
+    margin: auto;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+#textList tr {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+#textList td {
+    padding: 12px 15px;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+    .drawer {
+        width: 200px;
+    }
+
+    .drawer.open ~ .main-content {
+        margin-left: 200px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+
+    button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .data-table th, .data-table td {
+        font-size: 14px;
+    }
+}
+
+/* === Pleine largeur pour container === */
+.container {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* === Formulaire (النموذج) === */
+.form-container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    margin-top: 30px;
+    max-width: 600px;
+    margin: auto;
+}
+
+.form-container h2 {
+    margin-bottom: 20px;
+    text-align: center;
+    color: #1e293b;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 16px;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background-color: #f9fafb;
+    color: #333;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #3b82f6;
+    outline: none;
+}
+
+button[type="submit"] {
+    background-color: #3b82f6;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    width: 100%;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #2563eb;
+}
+
+/* === Boutons supplémentaires === */
+button[type="reset"] {
+    background-color: #1e293b;
+    color: #1e293b;
+    border: 1px solid #d1d5db;
+    margin-top: 10px;
+}
+
+button[type="reset"]:hover {
+    background-color: #1e293b;
+}
+
+/* === Lien pour retour === */
+a.back-link {
+    display: inline-block;
+    margin-top: 20px;
+    color: #3b82f6;
+    text-decoration: none;
+}
+
+a.back-link:hover {
+    text-decoration: underline;
+}
+
+/* === Ajout de l'animation pour transition === */
+.form-container {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.form-container.show {
+    opacity: 1;
+}
+.btn-edit {
+    background-color: #facc15; /* أصفر */
+    color: #1e293b;
+}
+
+.btn-edit:hover {
+    background-color: #eab308;
+    color: white;
+}
+
+.btn-delete {
+    background-color: #ef4444; /* أحمر */
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #dc2626;
+}
+/* زر التعديل */
+.btn-edit {
+    background-color: #facc15; /* أصفر */
+    color: #1e293b;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.btn-edit:hover {
+    background-color: #eab308;
+    color: white;
+}
+
+/* زر الحذف */
+.btn-delete {
+    background-color: #ef4444; /* أحمر */
+    color: white;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.btn-delete:hover {
+    background-color: #dc2626;
+}
+/* زر الإضافة */
+.btn-add {
+    background-color: #3b82f6; /* أزرق */
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.btn-add:hover {
+    background-color: #2563eb;
+}
+/* زر الرجوع */
+.back-button {
+    color: white;
+    text-decoration: none;
+    font-size: 20px;
+    background-color: #1e293b;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.back-button:hover {
+    background-color: #334155;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fc;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #1e293b;
+    color: white;
+    padding: 15px 20px;
+}
+
+.back-button {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 40px auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+h2 {
+    text-align: center;
+    color: #1e293b;
+    margin-bottom: 30px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #1e293b;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="email"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background-color: #f9fafb;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+button[type="submit"] {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #2563eb;
+}
+table {
+            width: 60%;
+            margin: auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 20px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+

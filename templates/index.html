@@ -13,9 +13,8 @@
         <h2>Menu</h2>
         <ul>
             <li><a href="{{ url_for('statistiques') }}">Statistiques</a></li>
-            <li><a href="/demandes">Demandes</a></li>
-            <li><a href="/utilisateurs">Utilisateurs</a></li>
-            <li><a href="{{ url_for('se_deconnecter') }}" class="btn btn-danger">Se déconnecter</a></li>
+            <li><a href="{{ url_for('profil', id=session['user_id']) }}">Profil</a></li>
+            <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout">Se déconnecter</a></li>
         </ul>
     </div>
 

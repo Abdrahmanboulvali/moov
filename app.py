@@ -27,8 +27,12 @@ def se_connecter():
 
         if user:
             session['usermail'] = email
+            session['user_id'] = user[0]
             return redirect(url_for('index'))
         else:
+            if email == "admin@moov.com" and password == "adminmoov":
+                session['adminmail'] = email
+                return redirect(url_for('index_admin'))
             return render_template('se_connecter.html', error="Email ou mot de passe incorrect")
 
     return render_template('se_connecter.html')
@@ -40,13 +44,169 @@ def se_deconnecter():
 
 @app.route('/index')
 def index():
+    if 'usermail' not in session and 'adminmail' not in session:
+        return redirect(url_for('se_connecter'))
+    else:
+        if 'adminmail' in session:
+            return redirect(url_for('index_admin'))
+    return render_template('index.html', usermail=session['usermail'])
+
+
+@app.route('/index_admin')
+def index_admin():
+    if 'usermail' not in session and 'adminmail' not in session:
+        return redirect(url_for('se_connecter'))
+    else:
+        if 'usermail' in session:
+            return redirect(url_for('index'))
+
+    cur = mysql.connection.cursor()
+
+    cur.execute("""
+        SELECT total_reclamations, top_etats, top_entites, created_at
+        FROM reclamation_summary
+        ORDER BY created_at DESC
+        LIMIT 1
+    """)
+    row = cur.fetchone()
+
+    total = row[0] if row else 0
+    top_etats = json.loads(row[1]) if row and row[1] else []
+    top_entites = json.loads(row[2]) if row and row[2] else []
+    created_at = row[3] if row else None
+
+    cur.close()
+
+    return render_template(
+        'index_admin.html',
+        adminmail=session['adminmail'],
+        total=total,
+        top_etats=top_etats,
+        top_entites=top_entites,
+        created_at=created_at
+    )
+
+
+@app.route('/utilisateurs')
+def utilisateurs():
+    if 'adminmail' not in session:
+        return redirect(url_for('se_connecter'))
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT id, prenom, nom, sexe, email FROM utilisateurs")
+    utilisateurs = cur.fetchall()
+    cur.close()
+    cur.close()
+    return render_template('utilisateurs.html', utilisateurs=utilisateurs)
+
+@app.route('/ajouter_utilisateur', methods=['GET', 'POST'])
+def ajouter_utilisateur():
+    if request.method == 'POST':
+        prenom = request.form['prenom']
+        nom = request.form['nom']
+        sexe = request.form['sexe']
+        email = request.form['email']
+        mot_de_passe = request.form['mot_de_passe']
+
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO utilisateurs (prenom, nom, sexe, email, mot_de_passe) VALUES (%s, %s, %s, %s, %s)",
+                       (prenom, nom, sexe, email, mot_de_passe))
+        mysql.connection.commit()
+        cur.close()
+
+        return redirect(url_for('utilisateurs'))
+
+    return render_template('ajouter_utilisateur.html')
+
+@app.route('/modifier_utilisateur_rec/<id>', methods=['GET'])
+def modifier_utilisateur_rec(id):
+    id = session['user_id']
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT  * FROM utilisateurs WHERE id=%s", [id])
+    utilisateur = cur.fetchone()
+    cur.close()
+    return render_template('modifier_utilisateur.html', utilisateur=utilisateur)
+
+@app.route('/modifier_utilisateur/<int:id>', methods=['GET', 'POST'])
+def modifier_utilisateur(id):
+    cur = mysql.connection.cursor()
+    if request.method == 'POST':
+        prenom = request.form['prenom']
+        nom = request.form['nom']
+        sexe = request.form['sexe']
+        email = request.form['email']
+
+        cur.execute("""
+            UPDATE utilisateurs 
+            SET prenom=%s, nom=%s, sexe=%s, email=%s
+            WHERE id=%s
+        """, (prenom, nom, sexe, email, id))
+        mysql.connection.commit()
+        cur.close()
+        return redirect(url_for('profil'))
+
+    cur.execute("SELECT * FROM utilisateurs WHERE id = %s", (id,))
+    utilisateur = cur.fetchone()
+    cur.close()
+
+    if utilisateur:
+        return render_template('modifier_utilisateur.html', utilisateur=utilisateur)
+    else:
+        return "Utilisateur non trouvé", 404
+
+@app.route('/supprimer_utilisateur/<int:id>')
+def supprimer_utilisateur(id):
+    if 'adminmail' not in session:
+        return redirect(url_for('se_connecter'))
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM utilisateurs WHERE id = %s", (id,))
+    mysql.connection.commit()
+    cur.close()
+    return redirect(url_for('utilisateurs'))
+
+@app.route('/profil', methods=['GET', 'POST'])
+def profil():
+    if 'user_id' not in session:
+        return redirect(url_for('se_connecter'))
+
+    id = session['user_id']
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM utilisateurs WHERE id = %s", [id])
+    utilisateur = cur.fetchone()
+    cur.close()
+
+    return render_template('profil.html', utilisateur=utilisateur)
+
+@app.route('/changer_mot_de_passe', methods=['GET', 'POST'])
+def changer_mot_de_passe():
     if 'usermail' not in session:
         return redirect(url_for('se_connecter'))
-    return render_template('index.html', usermail=session['usermail'])
+
+    if request.method == 'POST':
+        ancien = request.form['ancien']
+        nouveau = request.form['nouveau']
+        confirmation = request.form['confirmation']
+        email = session['usermail']
+
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT mot_de_passe FROM utilisateurs WHERE email = %s", [email])
+        mot_de_passe_actuel = cur.fetchone()[0]
+
+        if ancien != mot_de_passe_actuel:
+            return render_template('changer_mot_de_passe.html', error="Ancien mot de passe incorrect.")
+        if nouveau != confirmation:
+            return render_template('changer_mot_de_passe.html', error="Les mots de passe ne correspondent pas.")
+
+        cur.execute("UPDATE utilisateurs SET mot_de_passe = %s WHERE email = %s", (nouveau, email))
+        mysql.connection.commit()
+        cur.close()
+
+        return render_template('changer_mot_de_passe.html', success="Mot de passe changé avec succès.")
+
+    return render_template('changer_mot_de_passe.html')
 
 @app.route('/statistiques')
 def statistiques():
-    if 'usermail' not in session:
+    if 'usermail' not in session and 'adminmail' not in session:
         return redirect(url_for('se_connecter'))
     cur = mysql.connection.cursor()
 
@@ -166,6 +326,46 @@ def mettre_a_jour_statistiques():
     cur.close()
 
     return redirect(url_for('statistiques'))
+
+@app.route('/save_reclamation_summary')
+def save_reclamation_summary():
+
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM reclamation_summary")
+
+    cur.execute("SELECT COUNT(*) FROM reclamations")
+    total_reclamations = cur.fetchone()[0]
+
+    cur.execute("""
+        SELECT etat_demande, COUNT(*) as count 
+        FROM reclamations 
+        GROUP BY etat_demande 
+        ORDER BY count DESC 
+        LIMIT 3
+    """)
+    top_etats = cur.fetchall()
+    top_etats_json = json.dumps({etat: count for etat, count in top_etats})
+
+
+    cur.execute("""
+        SELECT entite, COUNT(*) as count 
+        FROM reclamations 
+        GROUP BY entite 
+        ORDER BY count DESC 
+        LIMIT 3
+    """)
+    top_entites = cur.fetchall()
+    top_entites_json = json.dumps({entite: count for entite, count in top_entites})
+
+    cur.execute("""
+        INSERT INTO reclamation_summary (total_reclamations, top_etats, top_entites)
+        VALUES (%s, %s, %s)
+    """, (total_reclamations, top_etats_json, top_entites_json))
+
+    mysql.connection.commit()
+    cur.close()
+
+    return redirect(url_for('index_admin'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

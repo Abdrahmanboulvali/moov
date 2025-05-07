@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil de l'utilisateur</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+</head>
+<body>
+    <!-- Drawer -->
+    <div class="drawer" id="drawer">
+        <h2>Menu</h2>
+        <ul>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('modifier_utilisateur', id=session['user_id']) }}" class="btn btn-primary">Modifier Profil</a></li>
+            <li><a href="{{ url_for('changer_mot_de_passe') }}" class="btn btn-warning mx-2">Changer mot de passe</a></li>
+            <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout">Se déconnecter</a></li>
+        </ul>
+    </div>
+
+    <div class="container mt-5">
+        <header>
+            <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
+            <h1 class="text-center">Tableau de Bord</h1>
+        </header>
+
+        <h2 class="main-content">Votre profil</h2>
+
+        <table>
+            <tr>
+                <th>Prénom</th>
+                <td>{{ utilisateur[1] }}</td>
+            </tr>
+            <tr>
+                <th>Nom</th>
+                <td>{{ utilisateur[2] }}</td>
+            </tr>
+            <tr>
+                <th>Sexe</th>
+                <td>{{ utilisateur[3] }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ utilisateur[4] }}</td>
+            </tr>
+        </table>
+
+    </div>
+
+    <script>
+        function toggleDrawer() {
+            document.getElementById('drawer').classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

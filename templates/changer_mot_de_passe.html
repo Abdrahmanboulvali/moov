@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Changer le mot de passe</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+</head>
+<body>
+    <header>
+        <a href="{{ url_for('profil') }}" class="back-button">← Retour</a>
+    </header>
+    <div class="container mt-5">
+        <h2 style="text-align: center;">Changer le mot de passe</h2>
+
+        {% if error %}
+            <p class="message" style="color: red;">{{ error }}</p>
+        {% elif success %}
+            <p class="message" style="color: green;">{{ success }}</p>
+        {% endif %}
+
+        <form method="POST">
+            <table>
+                <tr>
+                    <td><label for="ancien">Ancien mot de passe</label></td>
+                    <td><input type="password" name="ancien" id="ancien" required></td>
+                </tr>
+                <tr>
+                    <td><label for="nouveau">Nouveau mot de passe</label></td>
+                    <td><input type="password" name="nouveau" id="nouveau" required></td>
+                </tr>
+                <tr>
+                    <td><label for="confirmation">Confirmer le nouveau mot de passe</label></td>
+                    <td><input type="password" name="confirmation" id="confirmation" required></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><button type="submit" class="btn">Changer</button></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Statistiques</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+</head>
+<body>
+    <!-- Drawer -->
+    <div class="drawer" id="drawer">
+        <h2>Menu</h2>
+        <ul>
+            <li><a href="{{ url_for('statistiques') }}">Statistiques</a></li>
+            <li><a href="{{ url_for('utilisateurs') }}">Utilisateurs</a></li>
+            <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout">Se déconnecter</a></li>
+        </ul>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="main-content">
+        <header>
+            <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
+            <h1>Tableau de Bord</h1>
+        </header>
+
+        <section class="dashboard">
+            <p>Dernière mise à jour : {{ created_at }}</p>
+
+            <!-- Statistiques -->
+            <div class="stats-cards">
+                <div class="card">
+                    <h3>Total Réclamations</h3>
+                    <p>{{ total }}</p>
+                </div>
+            </div>
+
+            <!-- Top États -->
+            <div class="top-list">
+                <h2>Top 3 États</h2>
+                <ul>
+                    {% for etat, count in top_etats.items() %}
+                        <li>{{ etat }} : {{ count }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Top Entités -->
+            <div class="top-list">
+                <h2>Top 3 Entités</h2>
+                <ul>
+                    {% for entite, count in top_entites.items() %}
+                        <li>{{ entite }} : {{ count }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Bouton de mise à jour -->
+            <a href="{{ url_for('save_reclamation_summary') }}" class="btn-update">🔄 Mettre à jour les statistiques</a>
+        </section>
+    </div>
+
+    <script>
+        function toggleDrawer() {
+            document.getElementById('drawer').classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
