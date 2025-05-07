@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiques</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</head>
+
+<body>
+
+    <!-- Drawer -->
+    <div class="drawer" id="drawer">
+        <h2>Menu</h2>
+        <ul>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="/demandes">Demandes</a></li>
+            <li><a href="/utilisateurs">Utilisateurs</a></li>
+        </ul>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="main-content">
+        <header>
+            <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
+            <h1>Tableau de Bord</h1>
+        </header>
+
+        <section class="dashboard">
+            <!-- Boutons pour changer de graphique -->
+            <div class="btn-container">
+                <button onclick="showChart('etat')" class="active">Par État</button>
+                <button onclick="showChart('entite')">Par Entité</button>
+                <button onclick="showChart('objet')">Par Objet</button>
+                <button onclick="showChart('canal')">Par Canal</button>
+            </div>
+            <!-- Bouton pour faire mise à jour les données -->
+            <div style="text-align: right; margin: 10px;">
+                <form action="{{ url_for('mettre_a_jour_statistiques') }}" method="post">
+                    <button type="submit" style="background-color: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px;">
+                        Mettre à jour les données 🔄
+                    </button>
+                </form>
+            </div>
+            <div class="container">
+        <!-- Tableau pour les données -->
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Catégorie</th>
+                    <th>Pourcentage</th>
+                </tr>
+            </thead>
+            <tbody id="textList">
+                <!-- Liste des pourcentages sera remplie ici -->
+            </tbody>
+        </table>
+
+        <!-- Canvas pour le graphique -->
+        <div class="chart-container">
+            <canvas id="myChart" width="400" height="400"></canvas>
+        </div>
+    </div>
+        </section>
+    </div>
+
+
+
+    <!-- Script JS -->
+    <script>
+        const chartData = {
+            etat: {
+                labels: {{ labels_etat | tojson }},
+                data: {{ data_etat | tojson }}
+            },
+            entite: {
+                labels: {{ labels_entite | tojson }},
+                data: {{ data_entite | tojson }}
+            },
+            objet: {
+                labels: {{ labels_objet | tojson }},
+                data: {{ data_objet | tojson }}
+            },
+            canal: {
+                labels: {{ labels_canal | tojson }},
+                data: {{ data_canal | tojson }}
+            }
+        };
+
+        let myChart;
+
+        // Fonction pour afficher le graphique
+        function showChart(type) {
+            // Retirer la classe "active" de tous les boutons
+            document.querySelectorAll('.btn-container button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Ajouter la classe "active" au bouton cliqué
+            const clickedButton = document.querySelector(`button[onclick="showChart('${type}')"]`);
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+
+            const ctx = document.getElementById('myChart').getContext('2d');
+
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            const labels = chartData[type].labels;
+            const data = chartData[type].data;
+
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56',
+                            '#4BC0C0', '#9966FF', '#FF9F40',
+                            '#C9CBCF', '#8BC34A', '#E91E63', '#00BCD4'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return `${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            updateTextList(type);
+        }
+
+        // Fonction pour mettre à jour le tableau avec les données
+        function updateTextList(type) {
+            const listContainer = document.getElementById("textList");
+            listContainer.innerHTML = "";
+
+            const labels = chartData[type].labels;
+            const data = chartData[type].data;
+
+            labels.forEach((label, i) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${label}</td><td>${data[i]}%</td>`;
+                listContainer.appendChild(tr);
+            });
+        }
+
+        // Charger par défaut le graphe par état
+        document.addEventListener("DOMContentLoaded", function () {
+            showChart('etat');
+        });
+    </script>
+    <script>
+        function toggleDrawer() {
+            document.getElementById('drawer').classList.toggle('open');
+        }
+    </script>
+</body>
+
+</html>
