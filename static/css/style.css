@@ -262,3 +262,100 @@ button.active {
             border-radius: 5px;
             display: inline-block;
         }
+
+        .stats-cards {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background-color: #f3f3f3;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex: 1;
+            text-align: center;
+        }
+        .top-list, .chart-container {
+            margin-top: 30px;
+        }
+        .top-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        .top-list li {
+            background-color: #e0e0e0;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .btn-update {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #1976d2;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .btn-update:hover {
+            background-color: #155a9c;
+        }
+        canvas {
+            max-width: 500px;
+            margin-top: 10px;
+        }
+
+        /* CSS للتفاعل مع الـ drawer */
+.drawer {
+    position: fixed;
+    top: 0;
+    left: -250px; /* هذا يحدد مكان الـ drawer عندما يكون مغلقًا */
+    width: 250px;
+    height: 100%;
+    transition: left 0.3s ease; /* الانتقال بسلاسة عند فتح/إغلاق الـ drawer */
+}
+
+.drawer.open {
+    left: 0; /* عندما يتم فتح الـ drawer */
+}
+
+/* تحريك المحتوى عند فتح الـ drawer */
+.container {
+    transition: margin-left 0.3s ease; /* انتقال المحتوى إلى اليمين */
+}
+
+.drawer.open + .container {
+    margin-left: 250px; /* هذه القيمة يجب أن تتناسب مع عرض الـ drawer */
+}
+body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .chart-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .btn-refresh {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            width: fit-content;
+        }
+        .btn-refresh:hover {
+            background-color: #0056b3;
+        }

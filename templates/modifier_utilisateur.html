@@ -4,40 +4,84 @@
     <meta charset="UTF-8">
     <title>Modifier Utilisateur</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 
 </head>
 <body>
 
-    <header>
-        <a href="{{ url_for('profil') }}" class="back-button">← Retour</a>
-    </header>
+<header>
+    <a href="{{ url_for('profil') }}" class="back-button">← Retour</a>
+</header>
 
-    <div class="container">
-        <h2>Modifier Utilisateur</h2>
-        <form method="POST">
-            <div>
-                <label for="prenom">Prénom</label>
-                <input type="text" name="prenom" id="prenom" value="{{ utilisateur[1] }}" required>
-            </div>
-            <div>
-                <label for="nom">Nom</label>
-                <input type="text" name="nom" id="nom" value="{{ utilisateur[2] }}" required>
-            </div>
-            <div>
-                <label for="sexe">Sexe</label>
-                <select name="sexe" id="sexe" required>
-                    <option value="Homme" {% if utilisateur[3] == 'Homme' %}selected{% endif %}>Homme</option>
-                    <option value="Femme" {% if utilisateur[3] == 'Femme' %}selected{% endif %}>Femme</option>
-                </select>
-            </div>
-            <div>
-                <label for="email">Email</label>
-                <input type="email" name="email" id="email" value="{{ utilisateur[4] }}" required>
-            </div>
-            <button type="submit">Enregistrer les modifications</button>
-        </form>
+<div class="container">
+    <h2>Modifier Utilisateur</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" id="formModification">
+        <div>
+            <label for="prenom">Prénom</label>
+            <input type="text" name="prenom" id="prenom" value="{{ utilisateur[1] }}" required>
+        </div>
+        <div>
+            <label for="nom">Nom</label>
+            <input type="text" name="nom" id="nom" value="{{ utilisateur[2] }}" required>
+        </div>
+        <div>
+            <label for="sexe">Sexe</label>
+            <select name="sexe" id="sexe" required>
+                <option value="Homme" {% if utilisateur[3] == 'Homme' %}selected{% endif %}>Homme</option>
+                <option value="Femme" {% if utilisateur[3] == 'Femme' %}selected{% endif %}>Femme</option>
+            </select>
+        </div>
+        <div>
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" value="{{ utilisateur[4] }}" required>
+        </div>
+
+        <input type="hidden" name="password" id="hiddenPassword">
+        <button type="button" onclick="ouvrirModal()">Enregistrer les modifications</button>
+    </form>
+</div>
+
+<!-- Modal -->
+<div class="modal" id="modalMotDePasse">
+    <div class="modal-content">
+        <p>Veuillez entrer votre mot de passe pour confirmer :</p>
+        <input type="password" id="motDePasseSaisi" placeholder="Mot de passe">
+        <div class="modal-buttons">
+            <button class="btn-valider" onclick="validerMotDePasse()">Valider</button>
+            <button class="btn-annuler" onclick="fermerModal()">Annuler</button>
+        </div>
     </div>
+</div>
+
+<script>
+    function ouvrirModal() {
+        document.getElementById('modalMotDePasse').style.display = 'block';
+    }
+
+    function fermerModal() {
+        document.getElementById('modalMotDePasse').style.display = 'none';
+        document.getElementById('motDePasseSaisi').value = '';
+    }
+
+    function validerMotDePasse() {
+        const mdp = document.getElementById('motDePasseSaisi').value.trim();
+        if (mdp === '') {
+            alert("Veuillez entrer votre mot de passe.");
+            return;
+        }
+        document.getElementById('hiddenPassword').value = mdp;
+        fermerModal();
+        document.getElementById('formModification').submit();
+    }
+</script>
 
 </body>
 </html>

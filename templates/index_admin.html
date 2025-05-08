@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Statistiques</title>
+    <title>Statistiques - Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
@@ -14,6 +14,7 @@
         <ul>
             <li><a href="{{ url_for('statistiques') }}">Statistiques</a></li>
             <li><a href="{{ url_for('utilisateurs') }}">Utilisateurs</a></li>
+            <li><a href="{{ url_for('analyse_temporelle') }}">Analyse temporelle</a></li>
             <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout">Se déconnecter</a></li>
         </ul>
     </div>
@@ -22,13 +23,35 @@
     <div class="main-content">
         <header>
             <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
-            <h1>Tableau de Bord</h1>
+            <h1>Tableau de Bord - Admin</h1>
         </header>
 
         <section class="dashboard">
             <p>Dernière mise à jour : {{ created_at }}</p>
 
-            <!-- Statistiques -->
+            <!-- Résumé -->
+            {% set top_etat_sorted = top_etats|dictsort(false, 'value') %}
+            {% set top_etat = top_etat_sorted[2] if top_etat_sorted else ['', 0] %}
+            {% set second_etat = top_etat_sorted[1] if top_etat_sorted|length > 1 else ['', 0] %}
+            {% set third_etat = top_etat_sorted[0] if top_etat_sorted|length > 2 else ['', 0] %}
+
+            {% set top_entite_sorted = top_entites|dictsort(false, 'value') %}
+            {% set top_entite = top_entite_sorted[2] if top_entite_sorted else ['', 0] %}
+            {% set second_entite = top_entite_sorted[1] if top_entite_sorted|length > 1 else ['', 0] %}
+            {% set third_entite = top_entite_sorted[0] if top_entite_sorted|length > 2 else ['', 0] %}
+
+            <p>
+                Le nombre total de réclamations enregistrées est de <strong>{{ total }}</strong>.<br>
+                L'état le plus fréquent est <strong>{{ top_etat[0] }}</strong> avec <strong>{{ top_etat[1] }}</strong> réclamations.
+                suivi de <strong>{{ second_etat[0] }}</strong> avec <strong>{{ second_etat[1] }}</strong> réclamations.
+                puis <strong>{{ third_etat[0] }}</strong> avec <strong>{{ third_etat[1] }}</strong> réclamations.<br>
+                L'entité la plus concernée est <strong>{{ top_entite[0] }}</strong> avec <strong>{{ top_entite[1] }}</strong> cas signalés.
+                suivi de <strong>{{ second_entite[0] }}</strong> avec <strong>{{ second_entite[1] }}</strong> cas signalés.
+                puis <strong>{{ third_entite[0] }}</strong> avec <strong>{{ third_entite[1] }}</strong> cas signalés.
+            </p>
+
+
+            <!-- Statistiques globales -->
             <div class="stats-cards">
                 <div class="card">
                     <h3>Total Réclamations</h3>
@@ -46,6 +69,11 @@
                 </ul>
             </div>
 
+            <!-- Graphe des États -->
+            <div class="chart-container">
+                <canvas id="etatChart"></canvas>
+            </div>
+
             <!-- Top Entités -->
             <div class="top-list">
                 <h2>Top 3 Entités</h2>
@@ -54,6 +82,11 @@
                         <li>{{ entite }} : {{ count }}</li>
                     {% endfor %}
                 </ul>
+            </div>
+
+            <!-- Graphe des Entités -->
+            <div class="chart-container">
+                <canvas id="entiteChart"></canvas>
             </div>
 
             <!-- Bouton de mise à jour -->
@@ -65,6 +98,58 @@
         function toggleDrawer() {
             document.getElementById('drawer').classList.toggle('open');
         }
+
+        // Top États
+        const etatLabels = {{ top_etats.keys() | list | tojson }};
+        const etatData = {{ top_etats.values() | list | tojson }};
+
+        const ctxEtat = document.getElementById('etatChart').getContext('2d');
+        new Chart(ctxEtat, {
+            type: 'bar',
+            data: {
+                labels: etatLabels,
+                datasets: [{
+                    label: 'Nombre de Réclamations',
+                    data: etatData,
+                    backgroundColor: '#42a5f5'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Répartition par État'
+                    }
+                }
+            }
+        });
+
+        // Top Entités
+        const entiteLabels = {{ top_entites.keys() | list | tojson }};
+        const entiteData = {{ top_entites.values() | list | tojson }};
+
+        const ctxEntite = document.getElementById('entiteChart').getContext('2d');
+        new Chart(ctxEntite, {
+            type: 'bar',
+            data: {
+                labels: entiteLabels,
+                datasets: [{
+                    label: 'Nombre de Réclamations',
+                    data: entiteData,
+                    backgroundColor: '#66bb6a'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Répartition par Entité'
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>

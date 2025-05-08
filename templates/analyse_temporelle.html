@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Analyse Temporelle</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</head>
+<body>
+    <!-- Drawer -->
+    <div class="drawer" id="drawer">
+        <h2>Menu</h2>
+        <ul>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('statistiques') }}">Statistiques</a></li>
+            <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout">Se déconnecter</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <header>
+            <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
+            <h1>Tableau de Bord</h1>
+        </header>
+
+        <h1>Analyse temporelle des réclamations</h1>
+
+        <a href="{{ url_for('update_stats_temporelles') }}" class="btn-refresh">🔄 Rafraîchir les statistiques</a>
+
+        <div class="chart-container">
+            <h2>Par mois</h2>
+            <canvas id="chartMois" width="800" height="400"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>Par année</h2>
+            <canvas id="chartAnnee" width="800" height="400"></canvas>
+        </div>
+    </div>
+        <script>
+            function toggleDrawer() {
+            document.getElementById('drawer').classList.toggle('open');
+        }
+            const moisCtx = document.getElementById('chartMois').getContext('2d');
+            new Chart(moisCtx, {
+                type: 'line',
+                data: {
+                    labels: {{ labels_mois | tojson }},
+                    datasets: [{
+                        label: 'Réclamations par mois',
+                        data: {{ valeurs_mois | tojson }},
+                        borderColor: 'blue',
+                        backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointBackgroundColor: 'blue'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            const anneeCtx = document.getElementById('chartAnnee').getContext('2d');
+            new Chart(anneeCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ labels_annee | tojson }},
+                    datasets: [{
+                        label: 'Réclamations par année',
+                        data: {{ valeurs_annee | tojson }},
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        </script>
+</body>
+</html>

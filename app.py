@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_mysqldb import MySQL
 import json
 
@@ -129,12 +129,26 @@ def modifier_utilisateur_rec(id):
 @app.route('/modifier_utilisateur/<int:id>', methods=['GET', 'POST'])
 def modifier_utilisateur(id):
     cur = mysql.connection.cursor()
+
+
+    cur.execute("SELECT * FROM utilisateurs WHERE id = %s", (id,))
+    utilisateur = cur.fetchone()
+
+    if not utilisateur:
+        cur.close()
+        return "Utilisateur non trouvé", 404
+
     if request.method == 'POST':
         prenom = request.form['prenom']
         nom = request.form['nom']
         sexe = request.form['sexe']
         email = request.form['email']
+        password = request.form['password']
 
+        if password != utilisateur[5]:
+            cur.close()
+            flash('Mot de passe incorrect. Veuillez réessayer.', 'danger')
+            return redirect(request.url)
         cur.execute("""
             UPDATE utilisateurs 
             SET prenom=%s, nom=%s, sexe=%s, email=%s
@@ -142,16 +156,11 @@ def modifier_utilisateur(id):
         """, (prenom, nom, sexe, email, id))
         mysql.connection.commit()
         cur.close()
+        flash("Modifications enregistrées avec succès.", "success")
         return redirect(url_for('profil'))
 
-    cur.execute("SELECT * FROM utilisateurs WHERE id = %s", (id,))
-    utilisateur = cur.fetchone()
     cur.close()
-
-    if utilisateur:
-        return render_template('modifier_utilisateur.html', utilisateur=utilisateur)
-    else:
-        return "Utilisateur non trouvé", 404
+    return render_template('modifier_utilisateur.html', utilisateur=utilisateur)
 
 @app.route('/supprimer_utilisateur/<int:id>')
 def supprimer_utilisateur(id):
@@ -366,6 +375,60 @@ def save_reclamation_summary():
     cur.close()
 
     return redirect(url_for('index_admin'))
+
+@app.route('/analyse_temporelle')
+def analyse_temporelle():
+    cur = mysql.connection.cursor()
+
+    cur.execute("SELECT periode, total FROM reclamations_temporelles WHERE periode_type = 'mois' ORDER BY periode")
+    data_mois = cur.fetchall()
+
+    cur.execute("SELECT periode, total FROM reclamations_temporelles WHERE periode_type = 'annee' ORDER BY periode")
+    data_annee = cur.fetchall()
+    cur.close()
+
+    labels_mois = [row[0] for row in data_mois]
+    valeurs_mois = [row[1] for row in data_mois]
+
+    labels_annee = [row[0] for row in data_annee]
+    valeurs_annee = [row[1] for row in data_annee]
+
+    return render_template(
+        'analyse_temporelle.html',
+        labels_mois=labels_mois,
+        valeurs_mois=valeurs_mois,
+        labels_annee=labels_annee,
+        valeurs_annee=valeurs_annee
+    )
+
+@app.route('/update_stats_temporelles')
+def update_stats_temporelles():
+    cur = mysql.connection.cursor()
+
+    # Vider les anciennes données
+    cur.execute("DELETE FROM reclamations_temporelles")
+
+    # Insérer les données mensuelles
+    cur.execute("""
+        INSERT INTO reclamations_temporelles (periode_type, periode, total)
+        SELECT 'mois', DATE_FORMAT(date_saisie, '%Y-%m'), COUNT(*)
+        FROM reclamations
+        WHERE date_saisie IS NOT NULL
+        GROUP BY DATE_FORMAT(date_saisie, '%Y-%m')
+    """)
+
+    # Insérer les données annuelles
+    cur.execute("""
+        INSERT INTO reclamations_temporelles (periode_type, periode, total)
+        SELECT 'annee', DATE_FORMAT(date_saisie, '%Y'), COUNT(*)
+        FROM reclamations
+        WHERE date_saisie IS NOT NULL
+        GROUP BY DATE_FORMAT(date_saisie, '%Y')
+    """)
+
+    mysql.connection.commit()
+    cur.close()
+    return redirect(url_for('analyse_temporelle'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
