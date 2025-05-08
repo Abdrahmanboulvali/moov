@@ -6,6 +6,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+
+    <!-- jQuery (مطلوب لـ DataTables) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
 
 </head>
 <body>
@@ -63,6 +72,16 @@
             document.getElementById('drawer').classList.toggle('open');
         }
     </script>
+    <script>
+        $(document).ready(function () {
+            $('.data-table').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json"
+                }
+            });
+        });
+    </script>
+
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
