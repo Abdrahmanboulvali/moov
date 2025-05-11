@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Profil de l'utilisateur</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 
 </head>
@@ -20,12 +19,11 @@
         </ul>
     </div>
 
-    <div class="container mt-5">
+    <div class="profile-card">
         <header>
             <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
             <h1 class="text-center">Tableau de Bord</h1>
         </header>
-
         <h2 class="main-content">Votre profil</h2>
 
         <table>
@@ -42,8 +40,8 @@
                 <td>{{ utilisateur[3] }}</td>
             </tr>
             <tr>
-                <th>Email</th>
-                <td>{{ utilisateur[4] }}</td>
+                <th>Login</th>
+                <td>{{ utilisateur[7] }}</td>
             </tr>
         </table>
 

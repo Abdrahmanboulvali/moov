@@ -3,9 +3,12 @@
 <head>
     <title>Page - Generale</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-
 </head>
 <body>
     <!-- Drawer -->
@@ -25,19 +28,57 @@
             <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
             <h1>Tableau de Bord</h1>
         </header>
-
+        <br>
+        <br>
         <section class="dashboard">
-            <!-- Contenu dynamique ici -->
-            <p>Bienvenue dans votre application de gestion des demandes.</p>
+            <!-- Tableau pour afficher les demandes de l'utilisateur avec DataTables -->
+            <h2>Mes Activités</h2>
+            <div class="btn-container" align="center">
+                <a href="{{ url_for('ajouter') }}" class="btn-add">Ajouter une reclamation</a>
+            </div>
+            <table id="myTable" class="display" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Numéro</th>
+                        <th>Objet</th>
+                        <th>Canal</th>
+                        <th>Date de Saisie</th>
+                        <th>Date de Clôture</th>
+                        <th>État</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reclamation in reclamations %}
+                        <tr>
+                            <td>{{ reclamation[0]}}</td>
+                            <td>{{ reclamation[1]}}</td>
+                            <td>{{ reclamation[2]}}</td>
+                            <td>{{ reclamation[3]}}</td>
+                            <td>{{ reclamation[4]}}</td>
+                            <td>{{ reclamation[5]}}</td>
+                            <td>
+                                <a href="{{ url_for('modifier_reclamation', numero=reclamation[0]) }}" class="btn-edit">Modifier</a>
+                                <a href="{{ url_for('supprimer_reclamation', numero=reclamation[0]) }}" class="btn-delete">Supprimer</a>
+
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </section>
     </div>
 
     <script>
+
+        $(document).ready(function() {
+            $('#myTable').DataTable();
+        });
+
         function toggleDrawer() {
             document.getElementById('drawer').classList.toggle('open');
         }
     </script>
 
 </body>
-
 </html>

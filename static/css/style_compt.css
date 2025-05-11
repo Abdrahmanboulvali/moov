@@ -1,4 +1,4 @@
-/* Base générale */
+/* === إعدادات عامة === */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -9,20 +9,46 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f8f9fc;
     color: #333;
-    display: flex;
-    height: 100vh;
+    margin: 0;
+    padding: 0;
 }
 
-/* === Drawer (Menu latéral) === */
+a, button {
+    transition: all 0.3s ease-in-out;
+}
+
+/* === الشريط العلوي === */
+header {
+    width: 100%;
+    height: 60px;
+    background-color: #1e293b;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 900;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease-in-out;
+}
+
+header.shift {
+    transform: translateX(240px);
+}
+
+/* === القائمة الجانبية === */
 .drawer {
     width: 240px;
-    background-color: #1e293b; /* اللون الداكن */
+    background-color: #1e293b;
     color: white;
     height: 100%;
     position: fixed;
-    top: 60px; /* مكانه بعد الشريط العلوي */
+    top: 60px;
     left: -240px;
-    transition: left 0.3s ease-in-out;
+    transition: left 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
     z-index: 100;
     padding-top: 20px;
     border-top-right-radius: 12px;
@@ -31,6 +57,7 @@ body {
 
 .drawer.open {
     left: 0;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.15);
 }
 
 .drawer ul {
@@ -40,6 +67,11 @@ body {
 
 .drawer li {
     padding: 15px 20px;
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.drawer li:hover {
+    transform: translateX(5px);
 }
 
 .drawer a {
@@ -54,88 +86,122 @@ body {
     color: white;
 }
 
-/* === Header (الشريط العلوي) === */
-header {
-    width: 100%;
-    height: 60px;
-    background-color: #1e293b; /* نفس اللون الداكن */
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    box-sizing: border-box;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 900;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease-in-out; /* إضافة التأثير */
-}
-
-header.shift {
-    transform: translateX(240px); /* تحريك الشريط العلوي لليمين بالتزامن مع فتح الـ drawer */
-}
-
-/* === Contenu principal === */
+/* === المحتوى الرئيسي === */
 .main-content {
-    margin-left: 0;
-    margin-top: 60px;
+    margin: 60px auto 0;
     padding: 20px;
     flex: 1;
-    transition: margin-left 0.3s ease-in-out;
+    max-width: 800px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: margin-left 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    box-sizing: border-box;
 }
 
 .drawer.open ~ .main-content {
     margin-left: 240px;
 }
 
-/* === Titres & Tables === */
+/* === العناوين === */
 h2 {
-    margin-bottom: 20px;
     font-size: 28px;
     text-align: center;
     color: #1e293b;
+    margin-bottom: 30px;
+    animation: fadeIn 0.5s ease;
 }
 
-.data-table {
+/* === الجداول === */
+.data-table, #textList, table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 20px;
     background-color: white;
+    margin-bottom: 20px;
     border-radius: 8px;
-    overflow: hidden;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    overflow: hidden;
+    animation: fadeIn 0.5s ease;
 }
 
-.data-table th, .data-table td {
+th, td {
     padding: 12px 15px;
     border-bottom: 1px solid #e2e8f0;
     text-align: left;
 }
 
-.data-table th {
+.data-table th, #textList th, table th {
     background-color: #f1f5f9;
 }
 
-/* === Boutons === */
-.btn-container {
-    text-align: center;
-    margin-bottom: 20px;
+/* === النماذج === */
+.form-container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    margin: 30px auto;
+    max-width: 600px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    animation: fadeInUp 0.6s ease;
+    animation-fill-mode: forwards;
 }
 
-button {
-    background-color: #3b82f6;
-    color: white;
+.form-container.show {
+    opacity: 1;
+}
+
+.form-group label,
+form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #1e293b;
+}
+
+input[type="text"], input[type="email"], select,
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background-color: #f9fafb;
+    transition: border-color 0.3s ease;
+}
+
+input:focus, select:focus {
+    border-color: #3b82f6;
+    outline: none;
+}
+
+/* === الأزرار العامة === */
+button,
+.btn-add, .btn-edit, .btn-delete, .btn-view,
+button[type="submit"], button[type="reset"], .back-button {
     padding: 10px 18px;
     border: none;
     border-radius: 6px;
-    margin: 5px;
     font-size: 16px;
     cursor: pointer;
-    transition: background 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease, transform 0.1s ease;
 }
 
-button:hover {
+button:active {
+    transform: scale(0.98);
+}
+
+/* ألوان الأزرار */
+button, .btn-add, button[type="submit"] {
+    background-color: #3b82f6;
+    color: white;
+}
+
+button:hover, .btn-add:hover, button[type="submit"]:hover {
     background-color: #2563eb;
 }
 
@@ -144,7 +210,123 @@ button.active {
     font-weight: bold;
 }
 
-/* === Graphique === */
+.btn-edit {
+    background-color: #facc15;
+    color: #1e293b;
+}
+
+.btn-edit:hover {
+    background-color: #eab308;
+    color: white;
+}
+
+.btn-delete {
+    background-color: #ef4444;
+    color: #1e293b;
+}
+
+.btn-delete:hover {
+    background-color: #dc2626;
+    color: white;
+}
+
+.btn-view {
+    background-color: #4CAF50;
+    color: #1e293b;
+}
+
+.btn-view:hover {
+    background-color: #45a049;
+    color: white;
+}
+
+button[type="reset"] {
+    background-color: #1e293b;
+    color: white;
+}
+
+.back-button {
+    background-color: #1e293b;
+    color: white;
+    font-size: 18px;
+}
+
+.back-button:hover {
+    background-color: #334155;
+}
+
+.btn-edit,
+.btn-delete,
+.btn-view {
+    padding: 4px 10px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    margin-right: 4px;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.alert {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.modal-buttons button {
+    width: 48%;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.btn-valider {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-annuler {
+    background-color: #dc3545;
+    color: white;
+}
+
+
 .chart-container {
     width: 100%;
     display: flex;
@@ -160,28 +342,7 @@ button.active {
     display: block;
 }
 
-/* === Liste pourcentages === */
-#textList {
-    width: 100%;
-    max-width: 600px;
-    margin: auto;
-    border-collapse: collapse;
-    margin-top: 20px;
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
 
-#textList tr {
-    border-bottom: 1px solid #e2e8f0;
-}
-
-#textList td {
-    padding: 12px 15px;
-}
-
-/* === Responsive === */
 @media (max-width: 768px) {
     .drawer {
         width: 200px;
@@ -205,163 +366,58 @@ button.active {
     }
 }
 
-/* === Pleine largeur pour container === */
+@media (max-width: 480px) {
+    .drawer {
+        width: 180px;
+    }
+
+    .drawer.open ~ .main-content {
+        margin-left: 180px;
+    }
+
+    .form-container, .main-content, .container {
+        padding: 20px;
+    }
+
+    table th, table td {
+        padding: 8px;
+    }
+}
+
 .container {
-    width: 100%;
-    max-width: 100%;
-}
-
-/* === Formulaire (النموذج) === */
-.form-container {
+    max-width: 1000px;
+    margin: 60px auto;
     background-color: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    margin-top: 30px;
-    max-width: 600px;
-    margin: auto;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.6s ease;
 }
 
-.form-container h2 {
-    margin-bottom: 20px;
-    text-align: center;
-    color: #1e293b;
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.form-group {
-    margin-bottom: 20px;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
-.form-group label {
-    display: block;
-    font-size: 16px;
-    color: #1e293b;
-    margin-bottom: 8px;
-}
-
-.form-group input,
-.form-group select {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    background-color: #f9fafb;
-    color: #333;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-    border-color: #3b82f6;
-    outline: none;
-}
-
-button[type="submit"] {
-    background-color: #3b82f6;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    width: 100%;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-button[type="submit"]:hover {
-    background-color: #2563eb;
-}
-
-/* === Boutons supplémentaires === */
-button[type="reset"] {
-    background-color: #1e293b;
-    color: #1e293b;
-    border: 1px solid #d1d5db;
-    margin-top: 10px;
-}
-
-button[type="reset"]:hover {
-    background-color: #1e293b;
-}
-
-/* === Lien pour retour === */
-a.back-link {
-    display: inline-block;
-    margin-top: 20px;
-    color: #3b82f6;
-    text-decoration: none;
-}
-
-a.back-link:hover {
-    text-decoration: underline;
-}
-
-/* === Ajout de l'animation pour transition === */
-.form-container {
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-}
-
-.form-container.show {
-    opacity: 1;
-}
-.btn-edit {
-    background-color: #facc15; /* أصفر */
-    color: #1e293b;
-}
-
-.btn-edit:hover {
-    background-color: #eab308;
-    color: white;
-}
-
-.btn-delete {
-    background-color: #ef4444; /* أحمر */
-    color: white;
-}
-
-.btn-delete:hover {
+.btn-logout {
     background-color: #dc2626;
-}
-/* زر التعديل */
-.btn-edit {
-    background-color: #facc15; /* أصفر */
-    color: #1e293b;
-    padding: 8px 14px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    transition: background-color 0.3s ease;
-}
-
-.btn-edit:hover {
-    background-color: #eab308;
-    color: white;
-}
-
-/* زر الحذف */
-.btn-delete {
-    background-color: #ef4444; /* أحمر */
-    color: white;
-    padding: 8px 14px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    transition: background-color 0.3s ease;
-}
-
-.btn-delete:hover {
-    background-color: #dc2626;
-}
-/* زر الإضافة */
-.btn-add {
-    background-color: #3b82f6; /* أزرق */
     color: white;
     padding: 10px 18px;
     border: none;
@@ -373,162 +429,55 @@ a.back-link:hover {
     transition: background-color 0.3s ease;
 }
 
-.btn-add:hover {
-    background-color: #2563eb;
+.btn-logout:hover {
+    background-color: #b91c1c;
 }
-/* زر الرجوع */
-.back-button {
-    color: white;
-    text-decoration: none;
-    font-size: 20px;
-    background-color: #1e293b;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 8px;
-    transition: background 0.3s ease;
-}
-
-.back-button:hover {
-    background-color: #334155;
+.profile-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+    padding: 40px;
+    animation: fadeSlide 0.6s ease-out;
+    transition: box-shadow 0.3s ease;
+    max-width: 800px;
+    margin: auto;
 }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f8f9fc;
-    margin: 0;
-    padding: 0;
+.profile-card:hover {
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
 }
 
-header {
-    background-color: #1e293b;
-    color: white;
-    padding: 15px 20px;
+@keyframes fadeSlide {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
-
-.back-button {
-    color: white;
-    text-decoration: none;
-    font-size: 18px;
-}
-
-.container {
-    max-width: 600px;
-    margin: 40px auto;
-    background-color: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-h2 {
-    text-align: center;
-    color: #1e293b;
-    margin-bottom: 30px;
-}
-
-label {
-    display: block;
-    margin-bottom: 8px;
-    color: #1e293b;
+.profile-card h2 {
+    font-size: 2rem;
     font-weight: bold;
+    margin-bottom: 30px;
+    text-align: center;
+    color: #1f2937; /* dark blue-gray */
 }
-
-input[type="text"],
-input[type="email"],
-select {
+.profile-card table {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    background-color: #f9fafb;
-    margin-bottom: 20px;
-    font-size: 16px;
+    border-collapse: collapse;
+    font-size: 1.05rem;
 }
 
-button[type="submit"] {
-    background-color: #3b82f6;
-    color: white;
-    border: none;
+.profile-card th, .profile-card td {
     padding: 12px 20px;
-    border-radius: 6px;
-    font-size: 16px;
-    cursor: pointer;
-    width: 100%;
-    transition: background-color 0.3s ease;
+    border-bottom: 1px solid #eee;
 }
 
-button[type="submit"]:hover {
-    background-color: #2563eb;
+.profile-card th {
+    background-color: #f9fbfd;
+    color: #374151;
+    text-align: left;
+    font-weight: 600;
 }
-table {
-            width: 60%;
-            margin: auto;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 12px 20px;
-            border: 1px solid #ccc;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-
-    /* تنسيق النافذة المنبثقة */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0; top: 0;
-            width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-        }
-
-        .modal-content {
-            background-color: #fff;
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 8px;
-            width: 300px;
-            text-align: center;
-        }
-
-        .modal-content input {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-        }
-
-        .modal-buttons {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .modal-buttons button {
-            width: 48%;
-            padding: 8px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .btn-valider {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .btn-annuler {
-            background-color: #dc3545;
-            color: white;
-        }
-        .alert {
-        padding: 10px;
-        margin-bottom: 15px;
-        border-radius: 4px;
-        text-align: center;
-    }
-    .alert-danger {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }

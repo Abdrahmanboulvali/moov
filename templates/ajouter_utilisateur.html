@@ -10,7 +10,8 @@
     <header>
         <a href="{{ url_for('utilisateurs') }}" class="back-button">← Retour</a>
     </header>
-
+    <br>
+    <br>
     <div class="container mt-5">
         <h2 class="text-center mb-4">Ajouter un utilisateur</h2>
         <form method="POST" action="{{ url_for('ajouter_utilisateur') }}">
@@ -31,8 +32,25 @@
                 </select>
             </div>
             <div class="mb-3">
-                <label for="email" class="form-label">Adresse email</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+                <label for="login" class="form-label">Login</label>
+                <input type="text" class="form-control" id="login" name="login" required>
+            </div>
+            <div class="mb-3">
+                <label for="agence_id" class="form-label">Agence</label>
+                <select class="form-control" id="agence_id" name="agence_id" required>
+                    <option value="">-- Sélectionner une agence --</option>
+                    {% for agence in agences %}
+                        <option value="{{ agence[0] }}">{{ agence[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="role">Rôle :</label>
+                <select name="role" id="role">
+                    <option value="">-- Sélectionner une role --</option>
+                    <option value="agent">Agent</option>
+                    <option value="admin">Admin</option>
+                </select>
             </div>
             <div class="mb-3">
                 <label for="mot_de_passe" class="form-label">Mot de passe</label>

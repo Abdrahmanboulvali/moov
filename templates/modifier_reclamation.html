@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier la Réclamation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <h1>Modifier la Réclamation</h1>
+
+    <!-- Formulaire de modification -->
+    <form method="POST">
+        <div class="form-group">
+            <label for="objet">Objet:</label>
+            <input type="text" id="objet" name="objet" value="{{ reclamation[0] }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="canal">Canal:</label>
+            <input type="text" id="canal" name="canal" value="{{ reclamation[3] }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="date_saisie">Date de Saisie:</label>
+            <input type="datetime-local" id="date_saisie" name="date_saisie" value="{{ reclamation[8] | datetimeformat('%Y-%m-%d %H:%M:%S') }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="date_cloture">Date de Clôture:</label>
+            <input type="datetime-local" id="date_cloture" name="date_cloture" value="{{ reclamation[12] | datetimeformat('%Y-%m-%d %H:%M:%S') }}">
+        </div>
+
+        <div class="form-group">
+            <label for="etat">État de la Réclamation:</label>
+            <select id="etat" name="etat" required>
+                <option value="en cours" {% if reclamation[5] == 'en cours' %}selected{% endif %}>En Cours</option>
+                <option value="clôturé" {% if reclamation[5] == 'clôturé' %}selected{% endif %}>Clôturé</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <button type="submit">Modifier</button>
+        </div>
+    </form>
+
+
+    <script>
+    </script>
+</body>
+</html>

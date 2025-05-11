@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajouter une Réclamation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
+
+</head>
+<body>
+
+    <header>
+        <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
+    </header>
+    <br>
+    <br>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Ajouter une Réclamation</h1>
+        <form action="{{ url_for('ajouter') }}" method="POST">
+            <label for="numero">Numéro :</label>
+            <input type="number" id="numero" name="numero" required>
+
+            <label for="canal">Canal :</label>
+            <select id="canal" name="canal" required>
+                <option value="">-- Choisir un canal --</option>
+                {% for canal in canaux %}
+                    <option value="{{ canal }}">{{ canal }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="objet">Objet :</label>
+            <input type="text" id="objet" name="objet" required>
+
+            <input type="hidden" id="login" name="login" value="{{ session['userlogin'] }}", required>
+
+            <label for="etat_demande">État de la demande :</label>
+            <select id="etat_demande" name="etat_demande" required>
+                <option value="en cours">En cours</option>
+                <option value="clôturé">Clôturé</option>
+            </select>
+
+            <label for="cause_reclamation">Cause de la réclamation :</label>
+            <textarea id="cause_reclamation" name="cause_reclamation" rows="4" required></textarea>
+
+            <label for="contact">Contact :</label>
+            <input type="text" id="contact" name="contact" required>
+
+            <label for="date_saisie">Date de saisie :</label>
+            <input type="datetime-local" id="date_saisie" name="date_saisie" value="{{ current_datetime }}" />
+
+            <label for="date_ext">Date de clôture :</label>
+            <input type="datetime-local" id="date_ext" name="date_ext" value="2040-01-01T00:00" />
+            <br>
+            <br>
+            <button type="submit" class="btn btn-primary w-100">Soumettre</button>
+        </form>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier une Agence</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
+</head>
+<body>
+    <header>
+        <a href="{{ url_for('agences') }}" class="back-button">← Retour</a>
+    </header>
+
+    <div class="container">
+        <h2>Modifier l'Agence</h2>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="nom_agence">Nom de l'agence</label>
+                <input type="text" id="nom_agence" name="nom_agence" class="form-control"
+                       value="{{ agence[1] }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="localisation">Localisation</label>
+                <input type="text" id="localisation" name="localisation" class="form-control"
+                       value="{{ agence[2] }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+        </form>
+    </div>
+
+</body>
+</html>

@@ -359,3 +359,63 @@ body {
         .btn-refresh:hover {
             background-color: #0056b3;
         }
+        .container {
+    max-width: 1000px; /* عريض */
+    margin: 60px auto; /* وسط الصفحة */
+    background-color: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1); /* ظل ناعم */
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.6s ease;
+}
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.container {
+    max-width: 1000px; /* عريض */
+    margin: 60px auto; /* وسط الصفحة */
+    background-color: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1); /* ظل ناعم */
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.6s ease;
+}
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* === الجداول === */
+.data-table, #textList, table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.data-table th, #textList th, table th {
+    background-color: #f1f5f9;
+}

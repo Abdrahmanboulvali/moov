@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajouter une agence</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
+</head>
+<body>
+    <header>
+        <a href="{{ url_for('agences') }}" class="back-button">← Retour</a>
+    </header>
+    <br>
+    <br>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Ajouter une agence</h2>
+        <form method="POST" action="{{ url_for('ajouter_agence') }}">
+            <div class="mb-3">
+                <label for="nom_agence" class="form-label">Nom de l'agence</label>
+                <input type="text" class="form-control" id="nom_agence" name="nom_agence" required>
+            </div>
+            <div class="mb-3">
+                <label for="localisation" class="form-label">Localisation (optionnelle)</label>
+                <input type="text" class="form-control" id="localisation" name="localisation">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Ajouter</button>
+        </form>
+    </div>
+</body>
+</html>

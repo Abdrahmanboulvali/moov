@@ -17,6 +17,7 @@
             <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout">Se déconnecter</a></li>
         </ul>
     </div>
+
     <div class="main-content">
         <header>
             <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
@@ -27,6 +28,57 @@
 
         <a href="{{ url_for('update_stats_temporelles') }}" class="btn-refresh">🔄 Rafraîchir les statistiques</a>
 
+        <h2>Réclamations dans les dernières 48 heures</h2>
+        {% if reclamations_48h %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Numéro</th>
+                        <th>Objet</th>
+                        <th>Canal</th>
+                        <th>Date de Saisie</th>
+                        <th>État</th>
+                        <th>Utilisateur</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reclamation in reclamations_48h %}
+                        <tr>
+                            <td>{{ reclamation[5] }}</td>
+                            <td>{{ reclamation[0] }}</td>
+                            <td>{{ reclamation[3] }}</td>
+                            <td>{{ reclamation[8] }}</td>
+                            <td>{{ reclamation[4] }}</td>
+                            <td>{{ reclamation[2] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Aucune réclamation dans les dernières 48 heures.</p>
+        {% endif %}
+
+        <div class="chart-container">
+            <h2>Dans les 48 dernières heures (par utilisateur)</h2>
+            <canvas id="chartLogin" width="1000" height="400"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>Dans les 48 dernières heures (par état)</h2>
+            <canvas id="chart48hEtat" width="1000" height="400"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>Dans les 48 dernières heures (par canal)</h2>
+            <canvas id="chart48hCanal" width="1000" height="400"></canvas>
+        </div>
+
+        <h2>Réclamations dans l'histoire</h2>
+        <div class="chart-container">
+            <h2>Par jour</h2>
+            <canvas id="chartJour" width="800" height="400"></canvas>
+        </div>
+
         <div class="chart-container">
             <h2>Par mois</h2>
             <canvas id="chartMois" width="800" height="400"></canvas>
@@ -36,61 +88,158 @@
             <h2>Par année</h2>
             <canvas id="chartAnnee" width="800" height="400"></canvas>
         </div>
+
+
     </div>
-        <script>
-            function toggleDrawer() {
+
+    <script>
+        function toggleDrawer() {
             document.getElementById('drawer').classList.toggle('open');
         }
-            const moisCtx = document.getElementById('chartMois').getContext('2d');
-            new Chart(moisCtx, {
-                type: 'line',
-                data: {
-                    labels: {{ labels_mois | tojson }},
-                    datasets: [{
-                        label: 'Réclamations par mois',
-                        data: {{ valeurs_mois | tojson }},
-                        borderColor: 'blue',
-                        backgroundColor: 'rgba(0, 0, 255, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 3,
-                        pointBackgroundColor: 'blue'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: true }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
 
-            const anneeCtx = document.getElementById('chartAnnee').getContext('2d');
-            new Chart(anneeCtx, {
-                type: 'bar',
-                data: {
-                    labels: {{ labels_annee | tojson }},
-                    datasets: [{
-                        label: 'Réclamations par année',
-                        data: {{ valeurs_annee | tojson }},
-                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1
-                    }]
+        const jourCtx = document.getElementById('chartJour').getContext('2d');
+        new Chart(jourCtx, {
+            type: 'line',
+            data: {
+                labels: {{ labels_jour | tojson }},
+                datasets: [{
+                    label: 'Réclamations par jour',
+                    data: {{ valeurs_jour | tojson }},
+                    borderColor: 'blue',
+                    backgroundColor: 'rgba(255, 206, 86, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointBackgroundColor: 'blue'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true }
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: true }
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        const moisCtx = document.getElementById('chartMois').getContext('2d');
+        new Chart(moisCtx, {
+            type: 'line',
+            data: {
+                labels: {{ labels_mois | tojson }},
+                datasets: [{
+                    label: 'Réclamations par mois',
+                    data: {{ valeurs_mois | tojson }},
+                    borderColor: 'blue',
+                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointBackgroundColor: 'blue'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        const anneeCtx = document.getElementById('chartAnnee').getContext('2d');
+        new Chart(anneeCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ labels_annee | tojson }},
+                datasets: [{
+                    label: 'Réclamations par année',
+                    data: {{ valeurs_annee | tojson }},
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        const chartLoginCtx = document.getElementById('chartLogin').getContext('2d');
+        new Chart(chartLoginCtx, {
+            type: 'line',
+            data: {
+                labels: {{ labels_48h_login | tojson }},
+                datasets: {{ datasets_48h_login | tojson }}
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true },
+                    title: {
+                        display: true,
+                        text: 'Réclamations par utilisateur (48h)'
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 20
+                        }
                     },
-                    scales: {
-                        y: { beginAtZero: true }
+                    y: {
+                        beginAtZero: true
                     }
                 }
-            });
-        </script>
+            }
+        });
+
+        const chart48hEtatCtx = document.getElementById('chart48hEtat').getContext('2d');
+        new Chart(chart48hEtatCtx, {
+            type: 'line',
+            data: {
+                labels: {{ labels_48h_etat | tojson }},
+                datasets: {{ datasets_48h_etat | tojson }}
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        const chart48hCanalCtx = document.getElementById('chart48hCanal').getContext('2d');
+        new Chart(chart48hCanalCtx, {
+            type: 'line',
+            data: {
+                labels: {{ labels_48h_canal | tojson }},
+                datasets: {{ datasets_48h_canal | tojson }}
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

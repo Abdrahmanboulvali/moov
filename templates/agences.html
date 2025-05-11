@@ -2,22 +2,14 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Liste des Utilisateurs</title>
+    <title>Liste des Agences</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-    <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-
-    <!-- jQuery ( DataTables) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-
-
 </head>
 <body>
-
     <!-- Drawer -->
     <div class="drawer" id="drawer">
         <h2>Menu</h2>
@@ -25,7 +17,7 @@
             <li><a href="{{ url_for('index_admin') }}">Home</a></li>
             <li><a href="{{ url_for('statistiques') }}">Statistiques</a></li>
             <li><a href="{{ url_for('analyse_temporelle') }}">Analyse temporelle</a></li>
-            <li><a href="{{ url_for('agences') }}">Agences</a></li>
+            <li><a href="{{ url_for('utilisateurs') }}">Utilisateurs</a></li>
             <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout">Se déconnecter</a></li>
         </ul>
     </div>
@@ -36,45 +28,33 @@
             <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
             <h1>Tableau de Bord</h1>
         </header>
-
-        <h2>Liste des Utilisateurs</h2>
-
+        <h2>Liste des agences</h2>
         <div class="btn-container" align="center">
-            <a href="{{ url_for('ajouter_utilisateur') }}" class="btn-add">Ajouter un utilisateur</a>
+            <a href="{{ url_for('ajouter_agence') }}" class="btn-add">Ajouter une agence</a>
         </div>
-
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Prénom</th>
-                    <th>Nom</th>
-                    <th>Sexe</th>
-                    <th>Login</th>
-                    <th>Rôle</th>
-                    <th>Agence</th>
+                    <th>Nom de l'agence</th>
+                    <th>Localisation</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for user in utilisateurs %}
+                {% for agence in agences %}
                 <tr>
-                    <td>{{ user[1] }}</td>  <!-- prénom -->
-                    <td>{{ user[2] }}</td>  <!-- nom -->
-                    <td>{{ user[3] }}</td>  <!-- sexe -->
-                    <td>{{ user[4] }}</td>  <!-- login -->
-                    <td>{{ user[5] }}</td>
-                    <td>{{ user[6] }}</td>
+                    <td>{{ agence[1] }}</td>
+                    <td>{{ agence[2] }}</td>
                     <td>
-                        {% if user[4] == session['adminlogin'] or user[5] != 'admin' %}
-                            <a href="{{ url_for('supprimer_utilisateur', id=user[0]) }}" class="btn-delete" onclick="return confirm('Êtes-vous sûr ?')">Supprimer</a>
-                        {% endif %}
+                        <a href="{{ url_for('utilisateurs_par_agence', agence_id=agence[0]) }}" class="btn-view">Voir utilisateurs</a>
+                        <a href="{{ url_for('modifier_agence', id=agence[0]) }}" class="btn-edit">Modifier</a>
+                        <a href="{{ url_for('supprimer_agence', id=agence[0]) }}" class="btn-delete" onclick="return confirm('Êtes-vous sûr ?')">Supprimer</a>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-
     <script>
         function toggleDrawer() {
             document.getElementById('drawer').classList.toggle('open');
@@ -89,8 +69,5 @@
             });
         });
     </script>
-
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
