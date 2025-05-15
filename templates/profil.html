@@ -8,22 +8,13 @@
 
 </head>
 <body>
-    <!-- Drawer -->
-    <div class="drawer" id="drawer">
-        <h2>Menu</h2>
-        <ul>
-            <li><a href="{{ url_for('index') }}">Home</a></li>
-            <li><a href="{{ url_for('modifier_utilisateur', id=session['user_id']) }}" class="btn btn-primary">Modifier Profil</a></li>
-            <li><a href="{{ url_for('changer_mot_de_passe') }}" class="btn btn-warning mx-2">Changer mot de passe</a></li>
-            <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout">Se déconnecter</a></li>
-        </ul>
-    </div>
+
+    <header>
+        <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
+    </header>
 
     <div class="profile-card">
-        <header>
-            <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
-            <h1 class="text-center">Tableau de Bord</h1>
-        </header>
+
         <h2 class="main-content">Votre profil</h2>
 
         <table>
@@ -44,7 +35,10 @@
                 <td>{{ utilisateur[7] }}</td>
             </tr>
         </table>
-
+        <ul>
+            <li><a href="{{ url_for('modifier_utilisateur', id=session['user_id']) }}" class="btn-add">Modifier Profil</a></li><br>
+            <li><a href="{{ url_for('changer_mot_de_passe') }}" class="btn-add">Changer mot de passe</a></li>
+        </ul>
     </div>
 
     <script>

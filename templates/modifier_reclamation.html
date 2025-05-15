@@ -4,49 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier la Réclamation</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
 </head>
 <body>
+    <header>
+        <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
+    </header>
+    <br><br>
 
-    <h1>Modifier la Réclamation</h1>
+    <div class="container mt-5">
+        <h1>Modifier la Réclamation</h1>
+        <form method="POST">
 
-    <!-- Formulaire de modification -->
-    <form method="POST">
-        <div class="form-group">
-            <label for="objet">Objet:</label>
-            <input type="text" id="objet" name="objet" value="{{ reclamation[0] }}" required>
-        </div>
+            <!-- Objet -->
+            <div class="form-group">
+                <label for="objet">Objet:</label>
+                <select id="objet" name="objet" required>
+                    {% for obj in objets %}
+                        <option value="{{ obj }}" {% if reclamation[0] == obj %}selected{% endif %}>{{ obj }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <div class="form-group">
-            <label for="canal">Canal:</label>
-            <input type="text" id="canal" name="canal" value="{{ reclamation[3] }}" required>
-        </div>
+            <!-- Canal -->
+            <div class="form-group">
+                <label for="canal">Canal:</label>
+                <select id="canal" name="canal" required>
+                    {% for c in canaux %}
+                        <option value="{{ c }}" {% if reclamation[3] == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <div class="form-group">
-            <label for="date_saisie">Date de Saisie:</label>
-            <input type="datetime-local" id="date_saisie" name="date_saisie" value="{{ reclamation[8] | datetimeformat('%Y-%m-%d %H:%M:%S') }}" required>
-        </div>
+            <!-- État -->
+            <div class="form-group">
+                <label for="etat">Etat:</label>
+                <select id="etat" name="etat" required>
+                    {% for etat in etats %}
+                        <option value="{{ etat }}" {% if reclamation[4] == etat %}selected{% endif %}>{{ etat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <div class="form-group">
-            <label for="date_cloture">Date de Clôture:</label>
-            <input type="datetime-local" id="date_cloture" name="date_cloture" value="{{ reclamation[12] | datetimeformat('%Y-%m-%d %H:%M:%S') }}">
-        </div>
-
-        <div class="form-group">
-            <label for="etat">État de la Réclamation:</label>
-            <select id="etat" name="etat" required>
-                <option value="en cours" {% if reclamation[5] == 'en cours' %}selected{% endif %}>En Cours</option>
-                <option value="clôturé" {% if reclamation[5] == 'clôturé' %}selected{% endif %}>Clôturé</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <button type="submit">Modifier</button>
-        </div>
-    </form>
+            <!-- Date de saisie -->
+            <div class="form-group">
+                <label for="date_saisie">Date de Saisie:</label>
+                <input type="datetime-local" id="date_saisie" name="date_saisie" value="{{ reclamation[8] | datetimeformat('%Y-%m-%d %H:%M:%S') }}" required>
+            </div>
 
 
-    <script>
-    </script>
+            <!-- Date de clôture -->
+            <div class="form-group">
+                <label for="date_cloture">Date de Clôture:</label>
+                <input type="datetime-local" id="date_cloture" name="date_cloture" value="{{ reclamation[12] | datetimeformat('%Y-%m-%d %H:%M:%S') }}">
+            </div>
+
+
+            <div class="form-group">
+                <button type="submit">Modifier</button>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

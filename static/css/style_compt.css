@@ -481,3 +481,26 @@ button[type="reset"] {
     text-align: left;
     font-weight: 600;
 }
+@media (max-width: 768px) {
+    .data-table, #structureTable {
+        width: 100%;
+        overflow-x: auto;  /* إضافة تمرير أفقي */
+        display: block;
+    }
+
+    .data-table th, .data-table td {
+        white-space: nowrap;  /* منع التفاف النص */
+    }
+
+    .data-table td {
+        padding: 8px 10px;
+    }
+
+    /* تثبيت رؤوس الأعمدة عند التمرير */
+    .data-table th {
+        position: sticky;
+        top: 0;
+        background-color: #f1f5f9;
+        z-index: 1;
+    }
+}

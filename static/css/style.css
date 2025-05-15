@@ -419,3 +419,92 @@ th, td {
 .data-table th, #textList th, table th {
     background-color: #f1f5f9;
 }
+button,
+.btn-add, .btn-edit, .btn-delete, .btn-view,
+button[type="submit"], button[type="reset"], .back-button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* ألوان الأزرار */
+button, .btn-add, button[type="submit"] {
+    background-color: #3b82f6;
+    color: white;
+}
+
+button:hover, .btn-add:hover, button[type="submit"]:hover {
+    background-color: #2563eb;
+}
+
+button.active {
+    background-color: #1d4ed8;
+    font-weight: bold;
+}
+
+.btn-edit {
+    background-color: #facc15;
+    color: #1e293b;
+}
+
+.btn-edit:hover {
+    background-color: #eab308;
+    color: white;
+}
+
+.btn-delete {
+    background-color: #ef4444;
+    color: #1e293b;
+}
+
+.btn-delete:hover {
+    background-color: #dc2626;
+    color: white;
+}
+
+.btn-view {
+    background-color: #4CAF50;
+    color: #1e293b;
+}
+
+.btn-view:hover {
+    background-color: #45a049;
+    color: white;
+}
+
+button[type="reset"] {
+    background-color: #1e293b;
+    color: white;
+}
+
+.back-button {
+    background-color: #1e293b;
+    color: white;
+    font-size: 18px;
+}
+
+.back-button:hover {
+    background-color: #334155;
+}
+
+.btn-edit,
+.btn-delete,
+.btn-view {
+    padding: 4px 10px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    margin-right: 4px;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}

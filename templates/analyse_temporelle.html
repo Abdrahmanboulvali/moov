@@ -8,27 +8,16 @@
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </head>
 <body>
-    <!-- Drawer -->
-    <div class="drawer" id="drawer">
-        <h2>Menu</h2>
-        <ul>
-            <li><a href="{{ url_for('index') }}">Home</a></li>
-            <li><a href="{{ url_for('statistiques') }}">Statistiques</a></li>
-            <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout">Se déconnecter</a></li>
-        </ul>
-    </div>
+
+    <header>
+        <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
+    </header>
 
     <div class="main-content">
-        <header>
-            <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
-            <h1>Tableau de Bord</h1>
-        </header>
 
         <h1>Analyse temporelle des réclamations</h1>
 
-        <a href="{{ url_for('update_stats_temporelles') }}" class="btn-refresh">🔄 Rafraîchir les statistiques</a>
 
-        <h2>Réclamations dans les dernières 48 heures</h2>
         {% if reclamations_48h %}
             <table>
                 <thead>
@@ -72,8 +61,26 @@
             <h2>Dans les 48 dernières heures (par canal)</h2>
             <canvas id="chart48hCanal" width="1000" height="400"></canvas>
         </div>
+        <h1>Analyse mensuelles des réclamations</h1>
+        <a href="{{ url_for('update_stats_mensuelles') }}" class="btn-refresh">🔄 Rafraîchir les statistiques mensuelles</a>
+        <div class="chart-container">
+            <h2>Dans les dernières 12 mois (par etat)</h2>
+            <canvas id="etatParMoisChart" width="1000" height="400"></canvas>
+        </div>
+        <h2>Dans les dernières 12 mois selon les catégories(par etat)</h2>
+        <div class="btn-container">
+            {% for cat in data_par_categorie %}
+                <button onclick="showChart('{{ cat }}')">Catégorie {{ cat }}</button>
+            {% endfor %}
+        </div>
+
+        <div class="chart-container">
+            <h2>Dans les dernières mois (par)</h2>
+            <canvas id="etatChart" width="1000" height="400"></canvas>
+        </div>
 
         <h2>Réclamations dans l'histoire</h2>
+        <a href="{{ url_for('update_stats_temporelles') }}" class="btn-refresh">🔄 Rafraîchir les statistiques</a>
         <div class="chart-container">
             <h2>Par jour</h2>
             <canvas id="chartJour" width="800" height="400"></canvas>
@@ -88,7 +95,6 @@
             <h2>Par année</h2>
             <canvas id="chartAnnee" width="800" height="400"></canvas>
         </div>
-
 
     </div>
 
@@ -238,6 +244,110 @@
                 scales: {
                     y: { beginAtZero: true }
                 }
+            }
+        });
+
+        const ctxEtatParMois = document.getElementById('etatParMoisChart').getContext('2d');
+        new Chart(ctxEtatParMois, {
+            type: 'bar',
+            data: {
+                labels: {{ labels_mois_etat | tojson }},
+                datasets: {{ datasets_mois_etat | tojson }}
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.raw + '%';
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Répartition des états par mois (%)'
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const chartData = {{ data_par_categorie | tojson }};
+        let etatChart;
+
+        function showChart(cat) {
+            const ctx = document.getElementById('etatChart').getContext('2d');
+            const data = chartData[cat];
+
+            if (etatChart) etatChart.destroy();
+
+            etatChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: data.datasets.map(ds => ({
+                        ...ds,
+                        barThickness: 5,
+                        borderRadius: 3,
+                        backgroundColor: ds.backgroundColor || 'rgba(75,192,192,0.6)',
+                        borderColor: ds.borderColor || 'rgba(75,192,192,1)',
+                        borderWidth: 1
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Répartition par état - Catégorie ${cat}`
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.formattedValue + '%';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        showChart(Object.keys(chartData)[0]);
+
+        const dataParCategorieParMois = {{ data_par_categorie_par_mois | tojson }};
+        document.getElementById('mois-selector').addEventListener('change', function() {
+            const mois = this.value;
+            for (const [categorie, chart] of Object.entries(window.chartsParCategorie)) {
+                const newData = dataParCategorieParMois[categorie][mois];
+                chart.data.labels = newData.labels;
+                chart.data.datasets = newData.datasets;
+                chart.update();
             }
         });
     </script>

@@ -18,24 +18,13 @@
 </head>
 <body>
 
-    <!-- Drawer -->
-    <div class="drawer" id="drawer">
-        <h2>Menu</h2>
-        <ul>
-            <li><a href="{{ url_for('index_admin') }}">Home</a></li>
-            <li><a href="{{ url_for('statistiques') }}">Statistiques</a></li>
-            <li><a href="{{ url_for('analyse_temporelle') }}">Analyse temporelle</a></li>
-            <li><a href="{{ url_for('agences') }}">Agences</a></li>
-            <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout">Se déconnecter</a></li>
-        </ul>
-    </div>
+    <header>
+        <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
+    </header>
     <br>
     <br>
     <div class="main-content">
-        <header>
-            <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
-            <h1>Tableau de Bord</h1>
-        </header>
+
 
         <h2>Liste des Utilisateurs</h2>
 

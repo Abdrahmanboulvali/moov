@@ -28,14 +28,21 @@
             </select>
 
             <label for="objet">Objet :</label>
-            <input type="text" id="objet" name="objet" required>
+            <select id="objet" name="objet" required>
+                <option value="">-- Choisir un objet --</option>
+                {% for objet in objets %}
+                    <option value="{{ objet }}">{{ objet }}</option>
+                {% endfor %}
+            </select>
 
             <input type="hidden" id="login" name="login" value="{{ session['userlogin'] }}", required>
 
             <label for="etat_demande">État de la demande :</label>
             <select id="etat_demande" name="etat_demande" required>
-                <option value="en cours">En cours</option>
-                <option value="clôturé">Clôturé</option>
+                <option value="">-- Choisir un etat --</option>
+                {% for etat in etats %}
+                    <option value="{{ etat }}">{{ etat }}</option>
+                {% endfor %}
             </select>
 
             <label for="cause_reclamation">Cause de la réclamation :</label>

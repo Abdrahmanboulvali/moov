@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Structure GDR</title>
+
+    <!-- CSS personnalisé -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.0/css/responsive.dataTables.min.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
+
+    <!-- JS personnalisé -->
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</head>
+<body>
+    <header>
+        <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
+    </header>
+
+    <div class="main-content">
+
+
+        <h2>Structure GDR</h2>
+
+        {% if structure_gdr %}
+        <table id="structureTable" class="display nowrap data-table" style="width:100%">
+            <thead>
+                <tr>
+                    {% for col in structure_gdr[0].keys() %}
+                        <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in structure_gdr %}
+                    <tr>
+                        {% for val in row.values() %}
+                            <td>{{ val }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>Aucune donnée à afficher.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        function toggleDrawer() {
+            document.getElementById('drawer').classList.toggle('open');
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $('#structureTable').DataTable({
+                responsive: true,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json"
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -15,6 +15,7 @@
     <div class="drawer" id="drawer">
         <h2>Menu</h2>
         <ul>
+            <li><a href="{{ url_for('reclamations') }}">Reclamations</a></li>
             <li><a href="{{ url_for('statistiques') }}">Statistiques</a></li>
             <li><a href="{{ url_for('analyse_temporelle') }}">Analyse temporelle</a></li>
             <li><a href="{{ url_for('profil', id=session['user_id']) }}">Profil</a></li>
@@ -58,9 +59,8 @@
                             <td>{{ reclamation[4]}}</td>
                             <td>{{ reclamation[5]}}</td>
                             <td>
-                                <a href="{{ url_for('modifier_reclamation', numero=reclamation[0]) }}" class="btn-edit">Modifier</a>
-                                <a href="{{ url_for('supprimer_reclamation', numero=reclamation[0]) }}" class="btn-delete">Supprimer</a>
-
+                                <a href="{{ url_for('modifier_reclamation', id=reclamation[6]) }}" class="btn-edit">Modifier</a>
+                                <a href="{{ url_for('supprimer_reclamation', id=reclamation[6]) }}" class="btn-delete">Supprimer</a>
                             </td>
                         </tr>
                     {% endfor %}

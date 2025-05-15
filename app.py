@@ -55,7 +55,7 @@ def index():
             return redirect(url_for('index_admin'))
     login = session['userlogin']
     cur = mysql.connection.cursor()
-    cur.execute("SELECT numero, objet, canal, date_saisie, date_ext, etat_demande FROM reclamations WHERE login = %s",
+    cur.execute("SELECT numero, objet, canal, date_saisie, date_ext, etat_demande, id FROM reclamations WHERE login = %s",
                 (login,))
     reclamations = cur.fetchall()
     cur.close()
@@ -349,12 +349,20 @@ def ajouter():
     cur = mysql.connection.cursor()
     cur.execute("SELECT DISTINCT canal FROM reclamations")
     canaux = [row[0] for row in cur.fetchall()]
+    cur.execute("SELECT DISTINCT etat_demande FROM reclamations")
+    etats = [row[0] for row in cur.fetchall()]
+    cur.execute("""
+    SELECT DISTINCT libelle
+    FROM structure_gdr
+    WHERE LEFT(arborescence, 2) IN ('1X', '2X', '3X', '4X') LIMIT 4;
+    """)
+    objets = [row[0] for row in cur.fetchall()]
     cur.close()
-    return render_template('ajouter.html', canaux=canaux)
+    return render_template('ajouter.html', canaux=canaux, etats=etats, objets=objets)
 
 
-@app.route('/modifier_reclamation/<string:numero>', methods=['GET', 'POST'])
-def modifier_reclamation(numero):
+@app.route('/modifier_reclamation/<int:id>', methods=['GET', 'POST'])
+def modifier_reclamation(id):
     cur = mysql.connection.cursor()
 
     if request.method == 'POST':
@@ -367,28 +375,48 @@ def modifier_reclamation(numero):
         cur.execute("""
             UPDATE reclamations 
             SET objet = %s, canal = %s, date_saisie = %s, date_ext = %s, etat_demande = %s 
-            WHERE numero = %s
-        """, (objet, canal, date_saisie, date_cloture, etat, numero))
+            WHERE id = %s
+        """, (objet, canal, date_saisie, date_cloture, etat, id))
         mysql.connection.commit()
         cur.close()
         return redirect(url_for('index'))
 
-    cur.execute("SELECT * FROM reclamations WHERE numero = %s", (numero,))
+    # Récupérer les infos de la réclamation à modifier
+    cur.execute("SELECT * FROM reclamations WHERE id = %s", (id,))
     reclamation = cur.fetchone()
-    cur.close()
 
     if not reclamation:
+        cur.close()
         return "Réclamation non trouvée", 404
 
-    return render_template('modifier_reclamation.html', reclamation=reclamation)
+    # Récupérer les listes des objets et canaux
+    cur.execute("""
+    SELECT DISTINCT libelle
+    FROM structure_gdr
+    WHERE LEFT(arborescence, 2) IN ('1X', '2X', '3X', '4X') LIMIT 4;
+    """)
+    objets = [row[0] for row in cur.fetchall()]
+    cur.execute("SELECT DISTINCT etat_demande FROM reclamations")
+    etats = [row[0] for row in cur.fetchall()]
+
+    cur.execute("SELECT DISTINCT canal FROM reclamations")
+    canaux = [row[0] for row in cur.fetchall()]
+
+    cur.close()
+
+    return render_template('modifier_reclamation.html',
+                           reclamation=reclamation,
+                           objets=objets,
+                           canaux=canaux,
+                           etats=etats)
 
 
-@app.route('/supprimer_reclamation/<string:numero>')
-def supprimer_reclamation(numero):
+@app.route('/supprimer_reclamation/<int:id>')
+def supprimer_reclamation(id):
     if 'userlogin' not in session:
         return redirect(url_for('se_connecter'))
     cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM reclamations WHERE numero = %s", (numero,))
+    cur.execute("DELETE FROM reclamations WHERE id = %s", (id,))
     mysql.connection.commit()
     cur.close()
     return redirect(url_for('index'))
@@ -610,7 +638,6 @@ def analyse_temporelle():
     """)
     grouped_48h = cur.fetchall()
 
-
     maintenant = datetime.now()
     heures = [(maintenant - timedelta(hours=i)).strftime('%Y-%m-%d %H:00:00') for i in reversed(range(49))]
 
@@ -622,27 +649,23 @@ def analyse_temporelle():
         data_par_etat[etat][heure] += total
         data_par_canal[canal][heure] += total
 
-    datasets_48h_etat = []
-    for etat, valeurs in data_par_etat.items():
-        datasets_48h_etat.append({
-            "label": f"État : {etat}",
-            "data": [valeurs.get(h, 0) for h in heures],
-            "borderColor": "rgba(54, 162, 235, 0.8)",
-            "backgroundColor": "rgba(54, 162, 235, 0.1)",
-            "fill": True,
-            "tension": 0.4
-        })
+    datasets_48h_etat = [{
+        "label": f"État : {etat}",
+        "data": [valeurs.get(h, 0) for h in heures],
+        "borderColor": "rgba(54, 162, 235, 0.8)",
+        "backgroundColor": "rgba(54, 162, 235, 0.1)",
+        "fill": True,
+        "tension": 0.4
+    } for etat, valeurs in data_par_etat.items()]
 
-    datasets_48h_canal = []
-    for canal, valeurs in data_par_canal.items():
-        datasets_48h_canal.append({
-            "label": f"Canal : {canal}",
-            "data": [valeurs.get(h, 0) for h in heures],
-            "borderColor": "rgba(255, 99, 132, 0.8)",
-            "backgroundColor": "rgba(255, 99, 132, 0.1)",
-            "fill": True,
-            "tension": 0.4
-        })
+    datasets_48h_canal = [{
+        "label": f"Canal : {canal}",
+        "data": [valeurs.get(h, 0) for h in heures],
+        "borderColor": "rgba(255, 99, 132, 0.8)",
+        "backgroundColor": "rgba(255, 99, 132, 0.1)",
+        "fill": True,
+        "tension": 0.4
+    } for canal, valeurs in data_par_canal.items()]
 
     # Réclamations pour utilisateur (login) sur 48h
     cur.execute("""
@@ -654,21 +677,101 @@ def analyse_temporelle():
     """)
     grouped_48h_login = cur.fetchall()
 
-    # Préparation des structures pour login
     data_par_login = defaultdict(lambda: defaultdict(int))
     for heure, login, total in grouped_48h_login:
         data_par_login[login][heure] += total
 
-    datasets_48h_login = []
-    for login, valeurs in data_par_login.items():
-        datasets_48h_login.append({
-            "label": f"Utilisateur : {login}",
-            "data": [valeurs.get(h, 0) for h in heures],
-            "borderColor": f"rgba({hash(login) % 255}, {(hash(login) // 255) % 255}, {(hash(login) // 65025) % 255}, 0.8)",
-            "backgroundColor": f"rgba({hash(login) % 255}, {(hash(login) // 255) % 255}, {(hash(login) // 65025) % 255}, 0.1)",
-            "fill": True,
-            "tension": 0.4
-        })
+    datasets_48h_login = [{
+        "label": f"Utilisateur : {login}",
+        "data": [valeurs.get(h, 0) for h in heures],
+        "borderColor": f"rgba({hash(login) % 255}, {(hash(login) // 255) % 255}, {(hash(login) // 65025) % 255}, 0.8)",
+        "backgroundColor": f"rgba({hash(login) % 255}, {(hash(login) // 255) % 255}, {(hash(login) // 65025) % 255}, 0.1)",
+        "fill": True,
+        "tension": 0.4
+    } for login, valeurs in data_par_login.items()]
+
+    # Données par mois et état
+    cur.execute("""
+        SELECT mois, etat_demande, total
+        FROM etat_par_mois
+        ORDER BY mois
+    """)
+    etat_par_mois = cur.fetchall()
+
+    mois_uniques = sorted(set(row[0] for row in etat_par_mois))
+    etats = sorted(set(row[1] for row in etat_par_mois))
+    mois_index = {mois: i for i, mois in enumerate(mois_uniques)}
+    totaux_par_mois = defaultdict(int)
+    valeurs_etat_par_mois = {etat: [0] * len(mois_uniques) for etat in etats}
+
+    for mois, etat, total in etat_par_mois:
+        index = mois_index[mois]
+        totaux_par_mois[mois] += total
+        valeurs_etat_par_mois[etat][index] += total
+
+    datasets_etat_par_mois = [{
+        "label": etat,
+        "data": [
+            round((val / totaux_par_mois[mois]) * 100, 2) if totaux_par_mois[mois] else 0
+            for mois, val in zip(mois_uniques, valeurs)
+        ],
+        "backgroundColor": f"rgba({hash(etat) % 255}, {(hash(etat) // 255) % 255}, {(hash(etat) // 65025) % 255}, 0.6)"
+    } for etat, valeurs in valeurs_etat_par_mois.items()]
+
+    cur.execute("""
+        SELECT mois, categorie, etat_demande, total
+        FROM etat_cat_par_mois
+        ORDER BY mois
+    """)
+    etat_cat_par_mois = cur.fetchall()
+
+    mois_uniques = sorted(set(row[0] for row in etat_cat_par_mois))
+    categories = sorted(set(row[1] for row in etat_cat_par_mois))
+    etats = sorted(set(row[2] for row in etat_cat_par_mois))
+    mois_index = {mois: i for i, mois in enumerate(mois_uniques)}
+
+    data_par_categorie = {}
+    for cat in categories:
+        filtred = [row for row in etat_cat_par_mois if row[1] == cat]
+        totaux_par_mois = defaultdict(int)
+        valeurs_etat_par_mois = {etat: [0] * len(mois_uniques) for etat in etats}
+
+        for mois, _, etat, total in filtred:
+            index = mois_index[mois]
+            totaux_par_mois[mois] += total
+            valeurs_etat_par_mois[etat][index] += total
+
+        datasets = [{
+            "label": etat,
+            "data": [
+                round((val / totaux_par_mois[mois]) * 100, 2) if totaux_par_mois[mois] else 0
+                for mois, val in zip(mois_uniques, valeurs)
+            ],
+            "backgroundColor": f"rgba({hash(etat + cat) % 255}, {(hash(etat + cat) // 255) % 255}, {(hash(etat + cat) // 65025) % 255}, 0.6)"
+        } for etat, valeurs in valeurs_etat_par_mois.items()]
+
+        data_par_categorie[cat] = {
+            "labels": mois_uniques,
+            "datasets": datasets
+        }
+
+    data_par_categorie_par_mois = {}
+    for cat in categories:
+        filtred = [row for row in etat_cat_par_mois if row[1] == cat]
+        data_par_categorie_par_mois[cat] = {}
+        for mois in mois_uniques:
+            filtred_mois = [row for row in filtred if row[0] == mois]
+            total_mois = sum(row[3] for row in filtred_mois)
+            datasets = [{
+                "label": etat,
+                "data": [round((sum(row[3] for row in filtred_mois if row[2] == etat) / total_mois) * 100, 2) if total_mois else 0],
+                "backgroundColor": f"rgba({hash(etat + cat) % 255}, {(hash(etat + cat) // 255) % 255}, {(hash(etat + cat) // 65025) % 255}, 0.6)"
+            } for etat in etats]
+
+            data_par_categorie_par_mois[cat][mois] = {
+                "labels": [mois],
+                "datasets": datasets
+            }
 
     cur.close()
 
@@ -687,11 +790,125 @@ def analyse_temporelle():
         datasets_48h_etat=datasets_48h_etat,
         labels_48h_canal=heures,
         datasets_48h_canal=datasets_48h_canal,
-        labels_48h_login = heures,
-        datasets_48h_login = datasets_48h_login
-
+        labels_48h_login=heures,
+        datasets_48h_login=datasets_48h_login,
+        labels_mois_etat=mois_uniques,
+        datasets_mois_etat=datasets_etat_par_mois,
+        data_par_categorie=data_par_categorie,
+        data_par_categorie_par_mois=json.dumps(data_par_categorie_par_mois)
     )
+@app.route('/update_stats_mensuelles')
+def update_stats_mensuelles():
+    cur = mysql.connection.cursor()
 
+    # 1. Créer des tables temporaires
+    cur.execute("""
+        CREATE TEMPORARY TABLE temp_etat_par_mois AS
+        SELECT DATE_FORMAT(date_saisie, '%Y-%m') AS mois, etat_demande, COUNT(*) AS total
+        FROM reclamations
+        WHERE date_saisie >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+        GROUP BY mois, etat_demande
+    """)
+
+    cur.execute("""
+        CREATE TEMPORARY TABLE temp_etat_cat_par_mois AS
+        SELECT DATE_FORMAT(r.date_saisie, '%Y-%m') AS mois,
+               LEFT(s.arborescence, 2) AS categorie,
+               r.etat_demande,
+               COUNT(*) AS total
+        FROM reclamations r
+        JOIN structure_gdr s ON r.objet = s.libelle
+        WHERE r.date_saisie >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+          AND LEFT(s.arborescence, 2) IN ('1X', '2X', '3X', '4X')
+        GROUP BY mois, categorie, r.etat_demande
+    """)
+
+    # 2. Vider les tables réelles
+    cur.execute("DELETE FROM etat_par_mois")
+    cur.execute("DELETE FROM etat_cat_par_mois")
+
+    # 3. Insérer les données depuis les tables temporaires
+    cur.execute("INSERT INTO etat_par_mois SELECT * FROM temp_etat_par_mois")
+    cur.execute("INSERT INTO etat_cat_par_mois SELECT * FROM temp_etat_cat_par_mois")
+
+    mysql.connection.commit()
+    cur.close()
+    return redirect(url_for('analyse_temporelle'))
+
+
+
+
+@app.route('/structure_gdr')
+def structure_gdr():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM structure_gdr")
+
+
+    column_names = [desc[0] for desc in cur.description]
+
+
+    results = [dict(zip(column_names, row)) for row in cur.fetchall()]
+
+    cur.close()
+    return render_template('structure_gdr.html', structure_gdr=results)
+
+@app.route('/reclamations')
+def reclamations():
+    message = request.args.get('message')
+
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM reclamations_cached LIMIT 1000")
+    column_names = [desc[0] for desc in cur.description]
+    results = [dict(zip(column_names, row)) for row in cur.fetchall()]
+    cur.close()
+
+    return render_template('reclamations.html', reclamations=results, message=message)
+
+
+@app.route('/update_cache')
+def update_cache():
+    try:
+        cur_write = mysql.connection.cursor()
+        cur_read = mysql.connection.cursor()
+
+        # Vider le cache
+        cur_write.execute("DELETE FROM reclamations_cached")
+        mysql.connection.commit()
+
+        # Lecture par batches avec fetchmany()
+        select_query = """
+            SELECT objet, entite, login, canal, etat_demande, numero,
+                   cause_reclamation, contact, date_saisie, date_prevue_vid,
+                   rem_saisie, date_ext, date_clo, rem_clo, user_id
+            FROM reclamations
+        """
+        cur_read.execute(select_query)
+
+        insert_query = """
+            INSERT INTO reclamations_cached (
+                objet, entite, login, canal, etat_demande, numero,
+                cause_reclamation, contact, date_saisie, date_prevue_vid,
+                rem_saisie, date_ext, date_clo, rem_clo, user_id
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+
+        batch_size = 10000
+        while True:
+            rows = cur_read.fetchmany(batch_size)
+            if not rows:
+                break
+            cur_write.executemany(insert_query, rows)
+            mysql.connection.commit()
+
+        message = "Les données ont été mises à jour avec succès."
+    except Exception as e:
+        mysql.connection.rollback()
+        message = f"Une erreur est survenue lors de la mise à jour : {str(e)}"
+    finally:
+        cur_read.close()
+        cur_write.close()
+
+    return redirect(url_for('reclamations', message=message))
 
 
 @app.route('/update_stats_temporelles')

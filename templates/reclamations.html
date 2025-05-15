@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des Réclamations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.0/css/responsive.dataTables.min.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
+</head>
+<body>
+    <header>
+        <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
+    </header>
+
+    <div class="main-content">
+
+
+        <h1>Liste des Réclamations</h1>
+
+        {% if message %}
+            <div class="alert alert-info">{{ message }}</div>
+        {% endif %}
+        <div class="btn-container">
+            <a href="{{ url_for('update_cache') }}" class="btn-add">
+                🔄 Mettre à jour les données
+            </a>
+        </div>
+
+        {% if reclamations %}
+        <table id="reclamationsTable" class="display nowrap" style="width:100%">
+            <thead>
+                <tr>
+                    {% for col in reclamations[0].keys() %}
+                        <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in reclamations %}
+                    <tr>
+                        {% for val in row.values() %}
+                            <td>{{ val }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>Aucune réclamation trouvée.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        function toggleDrawer() {
+            document.getElementById('drawer').classList.toggle('open');
+        }
+
+        $(document).ready(function () {
+            $('#reclamationsTable').DataTable({
+                responsive: true,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json"
+                }
+            });
+        });
+    </script>
+</body>
+</html>
