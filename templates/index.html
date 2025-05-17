@@ -3,6 +3,8 @@
 <head>
     <title>Page - Generale</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <!-- DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -15,11 +17,11 @@
     <div class="drawer" id="drawer">
         <h2>Menu</h2>
         <ul>
-            <li><a href="{{ url_for('reclamations') }}">Reclamations</a></li>
-            <li><a href="{{ url_for('statistiques') }}">Statistiques</a></li>
-            <li><a href="{{ url_for('analyse_temporelle') }}">Analyse temporelle</a></li>
-            <li><a href="{{ url_for('profil', id=session['user_id']) }}">Profil</a></li>
-            <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout">Se déconnecter</a></li>
+            <li><a href="{{ url_for('reclamations') }}"><i class="fas fa-file-alt"></i> Reclamations</a></li>
+            <li><a href="{{ url_for('statistiques') }}"><i class="fas fa-chart-bar"></i> Statistiques</a></li>
+            <li><a href="{{ url_for('analyse_temporelle') }}"><i class="fas fa-clock"></i> Analyse temporelle</a></li>
+            <li><a href="{{ url_for('profil', id=session['user_id']) }}"><i class="fas fa-user"></i> Profil</a></li>
+            <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Se déconnecter</a></li>
         </ul>
     </div>
 
@@ -27,7 +29,11 @@
     <div class="main-content">
         <header>
             <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
-            <h1>Tableau de Bord</h1>
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+              <a class="navbar-brand d-flex align-items-center" href="#">
+                    <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
+              </a>
+            </nav>
         </header>
         <br>
         <br>
@@ -35,7 +41,7 @@
             <!-- Tableau pour afficher les demandes de l'utilisateur avec DataTables -->
             <h2>Mes Activités</h2>
             <div class="btn-container" align="center">
-                <a href="{{ url_for('ajouter') }}" class="btn-add">Ajouter une reclamation</a>
+                <a href="{{ url_for('ajouter') }}" class="btn-add"><i class="fas fa-plus-circle"></i> Ajouter une reclamation</a>
             </div>
             <table id="myTable" class="display" cellspacing="0" width="100%">
                 <thead>
@@ -59,8 +65,8 @@
                             <td>{{ reclamation[4]}}</td>
                             <td>{{ reclamation[5]}}</td>
                             <td>
-                                <a href="{{ url_for('modifier_reclamation', id=reclamation[6]) }}" class="btn-edit">Modifier</a>
-                                <a href="{{ url_for('supprimer_reclamation', id=reclamation[6]) }}" class="btn-delete">Supprimer</a>
+                                <a href="{{ url_for('modifier_reclamation', id=reclamation[6]) }}" class="btn-edit"><i class="fas fa-edit"></i>&nbsp;Modifier</a>
+                                <a href="{{ url_for('supprimer_reclamation', id=reclamation[6]) }}" class="btn-delete" onclick="return confirm('Êtes-vous sûr ?')"><i class="fas fa-trash-alt"></i>&nbsp;Supprimer</a>
                             </td>
                         </tr>
                     {% endfor %}

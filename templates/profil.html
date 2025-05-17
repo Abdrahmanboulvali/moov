@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Profil de l'utilisateur</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 
 </head>
@@ -11,6 +12,11 @@
 
     <header>
         <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+              <a class="navbar-brand d-flex align-items-center" href="#">
+                    <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
+              </a>
+        </nav>
     </header>
 
     <div class="profile-card">
@@ -36,8 +42,8 @@
             </tr>
         </table>
         <ul>
-            <li><a href="{{ url_for('modifier_utilisateur', id=session['user_id']) }}" class="btn-add">Modifier Profil</a></li><br>
-            <li><a href="{{ url_for('changer_mot_de_passe') }}" class="btn-add">Changer mot de passe</a></li>
+            <li><a href="{{ url_for('modifier_utilisateur', id=session['user_id']) }}" class="btn-add"><i class="fas fa-user-edit"></i> Modifier Profil</a></li><br>
+            <li><a href="{{ url_for('changer_mot_de_passe') }}" class="btn-add"><i class="fas fa-key"></i> Changer mot de passe</a></li>
         </ul>
     </div>
 

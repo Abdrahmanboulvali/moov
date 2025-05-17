@@ -4,12 +4,18 @@
     <meta charset="UTF-8">
     <title>Modifier Utilisateur</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
 <body>
 
 <header>
     <a href="{{ url_for('profil') }}" class="back-button">← Retour</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+          <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
+          </a>
+    </nav>
 </header>
 
 <div class="container">
@@ -45,7 +51,7 @@
         </div>
 
         <input type="hidden" name="password" id="hiddenPassword">
-        <button type="button" onclick="ouvrirModal()">Enregistrer les modifications</button>
+        <button type="button" onclick="ouvrirModal()"><i class="fas fa-save"></i>&nbsp;Enregistrer les modifications</button>
     </form>
 </div>
 

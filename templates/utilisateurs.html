@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Liste des Utilisateurs</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
@@ -20,6 +21,11 @@
 
     <header>
         <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+              <a class="navbar-brand d-flex align-items-center" href="#">
+                    <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
+              </a>
+        </nav>
     </header>
     <br>
     <br>
@@ -29,7 +35,7 @@
         <h2>Liste des Utilisateurs</h2>
 
         <div class="btn-container" align="center">
-            <a href="{{ url_for('ajouter_utilisateur') }}" class="btn-add">Ajouter un utilisateur</a>
+            <a href="{{ url_for('ajouter_utilisateur') }}" class="btn-add"><i class="fas fa-user-plus"></i> Ajouter un utilisateur</a>
         </div>
 
         <table class="data-table">
@@ -55,7 +61,7 @@
                     <td>{{ user[6] }}</td>
                     <td>
                         {% if user[4] == session['adminlogin'] or user[5] != 'admin' %}
-                            <a href="{{ url_for('supprimer_utilisateur', id=user[0]) }}" class="btn-delete" onclick="return confirm('Êtes-vous sûr ?')">Supprimer</a>
+                            <a href="{{ url_for('supprimer_utilisateur', id=user[0]) }}" class="btn-delete" onclick="return confirm('Êtes-vous sûr ?')"><i class="fas fa-trash-alt"></i>&nbsp;Supprimer</a>
                         {% endif %}
                     </td>
                 </tr>

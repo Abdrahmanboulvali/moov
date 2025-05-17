@@ -3,6 +3,7 @@
 <head>
     <title>Page - General - Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 
@@ -12,14 +13,14 @@
     <div class="drawer" id="drawer">
         <h2>Menu</h2>
         <ul>
-            <li><a href="{{ url_for('reclamations') }}">Reclamations</a></li>
-            <li><a href="{{ url_for('statistiques') }}">Statistiques</a></li>
-            <li><a href="{{ url_for('analyse_temporelle') }}">Analyse temporelle</a></li>
-            <li><a href="{{ url_for('agences') }}">Agences</a></li>
-            <li><a href="{{ url_for('utilisateurs') }}">Utilisateurs</a></li>
-            <li><a href="{{ url_for('structure_gdr') }}">Structure</a></li>
-            <li><a href="{{ url_for('profil') }}">Profil</a></li>
-            <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout">Se déconnecter</a></li>
+            <li><a href="{{ url_for('reclamations') }}"><i class="fas fa-file-alt"></i> Reclamations</a></li>
+            <li><a href="{{ url_for('statistiques') }}"><i class="fas fa-chart-bar"></i> Statistiques</a></li>
+            <li><a href="{{ url_for('analyse_temporelle') }}"><i class="fas fa-clock"></i> Analyse temporelle</a></li>
+            <li><a href="{{ url_for('agences') }}"><i class="fas fa-building"></i> Agences</a></li>
+            <li><a href="{{ url_for('utilisateurs') }}"><i class="fas fa-users"></i> Utilisateurs</a></li>
+            <li><a href="{{ url_for('structure_gdr') }}"><i class="fas fa-sitemap"></i> Structure</a></li>
+            <li><a href="{{ url_for('profil') }}"><i class="fas fa-user"></i> Profil</a></li>
+            <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Se déconnecter</a></li>
         </ul>
     </div>
 
@@ -27,7 +28,12 @@
     <div class="main-content">
         <header>
             <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
-            <h1>Tableau de Bord - Admin</h1>
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+              <a class="navbar-brand d-flex align-items-center" href="#">
+                    <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
+              </a>
+            </nav>
+
         </header>
 
         <section class="dashboard">

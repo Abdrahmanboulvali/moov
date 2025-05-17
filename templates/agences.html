@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Liste des Agences</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -12,13 +13,18 @@
 <body>
     <header>
         <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+              <a class="navbar-brand d-flex align-items-center" href="#">
+                    <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
+              </a>
+        </nav>
     </header>
     <br>
     <br>
     <div class="main-content">
         <h2>Liste des agences</h2>
         <div class="btn-container" align="center">
-            <a href="{{ url_for('ajouter_agence') }}" class="btn-add">Ajouter une agence</a>
+            <a href="{{ url_for('ajouter_agence') }}" class="btn-add"><i class="fas fa-building"></i> Ajouter une agence</a>
         </div>
         <table class="data-table">
             <thead>
@@ -34,9 +40,9 @@
                     <td>{{ agence[1] }}</td>
                     <td>{{ agence[2] }}</td>
                     <td>
-                        <a href="{{ url_for('utilisateurs_par_agence', agence_id=agence[0]) }}" class="btn-view">Voir utilisateurs</a>
-                        <a href="{{ url_for('modifier_agence', id=agence[0]) }}" class="btn-edit">Modifier</a>
-                        <a href="{{ url_for('supprimer_agence', id=agence[0]) }}" class="btn-delete" onclick="return confirm('Êtes-vous sûr ?')">Supprimer</a>
+                        <a href="{{ url_for('utilisateurs_par_agence', agence_id=agence[0]) }}" class="btn-view"><i class="fas fa-users"></i>&nbsp;Voir utilisateurs</a>
+                        <a href="{{ url_for('modifier_agence', id=agence[0]) }}" class="btn-edit"><i class="fas fa-edit"></i>&nbsp;Modifier</a>
+                        <a href="{{ url_for('supprimer_agence', id=agence[0]) }}" class="btn-delete" onclick="return confirm('Êtes-vous sûr ?')"><i class="fas fa-trash-alt"></i>&nbsp;Supprimer</a>
                     </td>
                 </tr>
                 {% endfor %}

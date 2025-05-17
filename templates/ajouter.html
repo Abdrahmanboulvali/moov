@@ -10,6 +10,11 @@
 
     <header>
         <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+              <a class="navbar-brand d-flex align-items-center" href="#">
+                    <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
+              </a>
+        </nav>
     </header>
     <br>
     <br>
@@ -27,9 +32,9 @@
                 {% endfor %}
             </select>
 
-            <label for="objet">Objet :</label>
+            <label for="objet">Catégorie :</label>
             <select id="objet" name="objet" required>
-                <option value="">-- Choisir un objet --</option>
+                <option value="">-- Choisir un catégorie --</option>
                 {% for objet in objets %}
                     <option value="{{ objet }}">{{ objet }}</option>
                 {% endfor %}
@@ -45,11 +50,11 @@
                 {% endfor %}
             </select>
 
-            <label for="cause_reclamation">Cause de la réclamation :</label>
-            <textarea id="cause_reclamation" name="cause_reclamation" rows="4" required></textarea>
-
             <label for="contact">Contact :</label>
             <input type="text" id="contact" name="contact" required>
+
+            <label for="cause_reclamation">Cause de la réclamation :</label>
+            <textarea id="cause_reclamation" name="cause_reclamation" rows="4" required></textarea>
 
             <label for="date_saisie">Date de saisie :</label>
             <input type="datetime-local" id="date_saisie" name="date_saisie" value="{{ current_datetime }}" />
