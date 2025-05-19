@@ -101,7 +101,7 @@ def index_admin():
 def utilisateurs():
     if 'adminlogin' not in session:
         return redirect(url_for('se_connecter'))
-
+    session.pop('previous_page', None)
     cur = mysql.connection.cursor()
     cur.execute("""
         SELECT u.id, u.prenom, u.nom, u.sexe, u.login, u.role, a.nom_agence
@@ -204,9 +204,11 @@ def utilisateurs_par_agence(agence_id):
     if 'adminlogin' not in session:
         return redirect(url_for('se_connecter'))
 
+    if request.method == 'GET' and 'previous_page' not in session:
+        session['previous_page'] = request.referrer
     cur = mysql.connection.cursor()
     cur.execute("""
-        SELECT u.id, u.prenom, u.nom, u.sexe, u.login, a.nom_agence
+        SELECT u.id, u.prenom, u.nom, u.sexe, u.login, u.role, u.est_chef_agence, a.nom_agence
         FROM utilisateurs u
         JOIN agences a ON u.agence_id = a.id
         WHERE a.id = %s
@@ -217,7 +219,70 @@ def utilisateurs_par_agence(agence_id):
     agence_nom = cur.fetchone()[0]
 
     cur.close()
-    return render_template('utilisateurs_par_agence.html', utilisateurs=utilisateurs, agence_nom=agence_nom)
+    return render_template('utilisateurs_par_agence.html', utilisateurs=utilisateurs, agence_nom=agence_nom, agence_id=agence_id)
+
+
+@app.route('/definir_chef_agence/<int:user_id>/<int:agence_id>')
+def definir_chef_agence(user_id, agence_id):
+    if 'adminlogin' not in session:
+        return redirect(url_for('se_connecter'))
+
+    cur = mysql.connection.cursor()
+
+    cur.execute("SELECT role FROM utilisateurs WHERE id = %s", (user_id,))
+    result = cur.fetchone()
+    if not result:
+        flash("Utilisateur introuvable", "danger")
+        return redirect(url_for('utilisateurs_par_agence', agence_id=agence_id))
+
+    role = result[0]
+    if role == 'admin':
+        flash("Impossible de définir un administrateur comme chef d'agence.", "warning")
+        return redirect(url_for('utilisateurs_par_agence', agence_id=agence_id))
+
+    cur.execute("UPDATE utilisateurs SET est_chef_agence = 0 WHERE agence_id = %s", (agence_id,))
+
+    cur.execute("UPDATE utilisateurs SET est_chef_agence = 1 WHERE id = %s", (user_id,))
+    mysql.connection.commit()
+    cur.close()
+
+    flash("Chef d'agence défini avec succès.", "success")
+    return redirect(url_for('utilisateurs_par_agence', agence_id=agence_id))
+
+@app.route('/utilisateur/<int:user_id>/modifier', methods=['GET', 'POST'])
+def modifier_utilisateur_admin(user_id):
+    if 'adminlogin' not in session:
+        return redirect(url_for('se_connecter'))
+
+    cur = mysql.connection.cursor()
+
+    if request.method == 'POST':
+        prenom = request.form['prenom']
+        nom = request.form['nom']
+        sexe = request.form['sexe']
+        login = request.form['login']
+        agence_id = request.form['agence_id']
+        role = request.form['role']
+
+        cur.execute("""
+            UPDATE utilisateurs
+            SET prenom = %s, nom = %s, sexe = %s, login = %s, agence_id = %s, role = %s
+            WHERE id = %s
+        """, (prenom, nom, sexe, login, agence_id, role, user_id))
+        mysql.connection.commit()
+        cur.close()
+        flash("Utilisateur modifié avec succès.")
+        return redirect(url_for('utilisateurs_par_agence', agence_id=agence_id))
+
+    # GET: afficher formulaire
+    cur.execute("SELECT * FROM utilisateurs WHERE id = %s", (user_id,))
+    utilisateur = cur.fetchone()
+
+    cur.execute("SELECT id, nom_agence FROM agences")
+    agences = cur.fetchall()
+
+    cur.close()
+    return render_template('modifier_utilisateur_admin.html', utilisateur=utilisateur, agences=agences)
 
 
 @app.route('/modifier_utilisateur_rec/<id>', methods=['GET'])

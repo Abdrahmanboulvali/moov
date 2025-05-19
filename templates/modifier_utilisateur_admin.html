@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier utilisateur</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        {% if session.get('previous_page') %}
+            <a href="{{ url_for('utilisateurs_par_agence',agence_id=utilisateur[5]) }}" class="back-button">← Retour</a>
+        {% else %}
+            <a href="{{ url_for('utilisateurs') }}" class="back-button">← Retour</a>
+        {% endif %}
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
+            </a>
+        </nav>
+    </header>
+
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Modifier l'utilisateur</h2>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="agence_id">Agence</label>
+                <select name="agence_id" id="agence_id" class="form-control" required>
+                    {% for agence in agences %}
+                        <option value="{{ agence[0] }}" {% if agence[0] == utilisateur[5] %}selected{% endif %}>{{ agence[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="role">Rôle</label>
+                <select name="role" id="role" class="form-control">
+                    <option value="agent" {% if utilisateur[6] == 'agent' %}selected{% endif %}>Agent</option>
+                    <option value="admin" {% if utilisateur[6] == 'admin' %}selected{% endif %}>Admin</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success w-100"><i class="fas fa-save"></i> Enregistrer</button>
+        </form>
+    </div>
+</body>
+</html>
