@@ -3,69 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <title>Ajouter une Réclamation</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_t.css') }}">
 </head>
 <body>
 
-    <header>
-        <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-              <a class="navbar-brand d-flex align-items-center" href="#">
-                    <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
-              </a>
-        </nav>
-    </header>
-    <br>
-    <br>
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">Ajouter une Réclamation</h1>
-        <form action="{{ url_for('ajouter') }}" method="POST">
-            <label for="numero">Numéro :</label>
-            <input type="number" id="numero" name="numero" required>
+<header>
+    <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+            <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
+        </a>
+    </nav>
+</header>
 
-            <label for="canal">Canal :</label>
-            <select id="canal" name="canal" required>
-                <option value="">-- Choisir un canal --</option>
-                {% for canal in canaux %}
-                    <option value="{{ canal }}">{{ canal }}</option>
-                {% endfor %}
+<br><br>
+
+<div class="main-content">
+    <h1 class="text-center mb-4">Ajouter une Réclamation</h1>
+    <form action="{{ url_for('ajouter') }}" method="POST">
+        <label for="numero">Numéro :</label>
+        <input type="number" id="numero" name="numero" required>
+
+        <label for="canal">Canal :</label>
+        <select id="canal" name="canal" required>
+            <option value="">-- Choisir un canal --</option>
+            {% for canal in canaux %}
+                <option value="{{ canal }}">{{ canal }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="objet">Catégorie :</label>
+        <select id="objet" name="objet" required>
+            <option value="">-- Choisir une catégorie --</option>
+            {% for objet in objets %}
+                <option value="{{ objet }}">{{ objet }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Nouveau champ : affiché seulement si 'Réclamations' est sélectionné -->
+        <div id="sous_reclamation_container" style="display: none;">
+            <label for="sous_reclamation">Type de réclamation :</label>
+            <select id="sous_reclamation" name="sous_reclamation">
+                <option value="">-- Choisir un type --</option>
+                <option value="FACTURE">FACTURE</option>
+                <option value="RECLAMATION CLIENTS">RECLAMATION CLIENTS</option>
+                <option value="TECHNIQUE">TECHNIQUE</option>
             </select>
+        </div>
 
-            <label for="objet">Catégorie :</label>
-            <select id="objet" name="objet" required>
-                <option value="">-- Choisir un catégorie --</option>
-                {% for objet in objets %}
-                    <option value="{{ objet }}">{{ objet }}</option>
-                {% endfor %}
-            </select>
+        <input type="hidden" id="login" name="login" value="{{ session['userlogin'] }}" required>
 
-            <input type="hidden" id="login" name="login" value="{{ session['userlogin'] }}", required>
-
+        <div id="etat_container" style="display: none;">
             <label for="etat_demande">État de la demande :</label>
-            <select id="etat_demande" name="etat_demande" required>
-                <option value="">-- Choisir un etat --</option>
+            <select id="etat_demande" name="etat_demande">
+                <option value="">-- Choisir un état --</option>
                 {% for etat in etats %}
                     <option value="{{ etat }}">{{ etat }}</option>
                 {% endfor %}
             </select>
+        </div>
 
-            <label for="contact">Contact :</label>
-            <input type="text" id="contact" name="contact" required>
+        <label for="contact">Contact :</label>
+        <input type="text" id="contact" name="contact" required>
 
-            <label for="cause_reclamation">Cause de la réclamation :</label>
-            <textarea id="cause_reclamation" name="cause_reclamation" rows="4" required></textarea>
+        <label for="cause_reclamation">Cause de la réclamation :</label>
+        <textarea id="cause_reclamation" name="cause_reclamation" rows="4" required></textarea>
 
-            <label for="date_saisie">Date de saisie :</label>
-            <input type="datetime-local" id="date_saisie" name="date_saisie" value="{{ current_datetime }}" />
+        <label for="date_saisie">Date de saisie :</label>
+        <input type="datetime-local" id="date_saisie" name="date_saisie" value="{{ current_datetime }}" />
 
-            <label for="date_ext">Date de clôture :</label>
-            <input type="datetime-local" id="date_ext" name="date_ext" value="2040-01-01T00:00" />
-            <br>
-            <br>
-            <button type="submit" class="btn btn-primary w-100">Soumettre</button>
-        </form>
+        <label for="date_pre_vid">Date de prévue VID :</label>
+        <input type="datetime-local" id="date_pre_vid" name="date_pre_vid" value="{{ current_datetime }}" />
 
-    </div>
+        <label for="date_ext">Date de clôture :</label>
+        <input type="datetime-local" id="date_ext" name="date_ext" value="2040-01-01T00:00" />
+
+        <br><br>
+        <button type="submit" class="btn btn-primary w-100">Soumettre</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const objetSelect = document.getElementById('objet');
+            const etatSelect = document.getElementById('etat_demande');
+            const etatContainer = document.getElementById('etat_container');
+            const sousReclamationContainer = document.getElementById('sous_reclamation_container');
+
+            objetSelect.addEventListener('change', function () {
+                const selectedObjet = objetSelect.value.toLowerCase();
+
+                // État automatique pour certains cas
+                if (selectedObjet.includes("renseignement") || selectedObjet.includes("appel coupé")) {
+                    const clotureOption = Array.from(etatSelect.options).find(option =>
+                        option.value.toLowerCase().includes('clôturé n0')
+                    );
+                    if (clotureOption) {
+                        etatSelect.value = clotureOption.value;
+                    }
+                    etatContainer.style.display = 'none';
+                } else if (selectedObjet.includes("sav") || selectedObjet.includes("reclamations")) {
+                    etatSelect.value = '';
+                    etatContainer.style.display = 'block';
+                } else {
+                    etatSelect.value = '';
+                    etatContainer.style.display = 'none';
+                }
+
+                // Affichage du champ sous_reclamation
+                if (selectedObjet.includes("reclamations")) {
+                    sousReclamationContainer.style.display = 'block';
+                } else {
+                    sousReclamationContainer.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</div>
 </body>
 </html>

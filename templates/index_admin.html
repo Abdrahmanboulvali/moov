@@ -4,7 +4,7 @@
     <title>Page - General - Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_t.css') }}">
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 
 </head>
@@ -25,9 +25,9 @@
     </div>
 
     <!-- Contenu principal -->
-    <div class="main-content">
+
         <header>
-            <button class="toggle-btn" onclick="toggleDrawer()">☰</button>
+            <button class="back-button" onclick="toggleDrawer()">☰</button>
             <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
               <a class="navbar-brand d-flex align-items-center" href="#">
                     <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
@@ -36,8 +36,8 @@
 
         </header>
 
-        <section class="dashboard">
-            <p>Dernière mise à jour : {{ created_at }}</p>
+    <div class="main-content">
+            <p class="update-time">Dernière mise à jour : {{ created_at }}</p>
 
             <!-- Résumé -->
             {% set top_etat_sorted = top_etats|dictsort(false, 'value') %}
@@ -49,7 +49,7 @@
             {% set top_entite = top_entite_sorted[2] if top_entite_sorted else ['', 0] %}
             {% set second_entite = top_entite_sorted[1] if top_entite_sorted|length > 1 else ['', 0] %}
             {% set third_entite = top_entite_sorted[0] if top_entite_sorted|length > 2 else ['', 0] %}
-
+        <div class="resume-stats">
             <p>
                 Le nombre total de réclamations enregistrées est de <strong>{{ total }}</strong>.<br>
                 L'état le plus fréquent est <strong>{{ top_etat[0] }}</strong> avec <strong>{{ top_etat[1] }}</strong> réclamations.
@@ -59,6 +59,9 @@
                 suivi de <strong>{{ second_entite[0] }}</strong> avec <strong>{{ second_entite[1] }}</strong> cas signalés.
                 puis <strong>{{ third_entite[0] }}</strong> avec <strong>{{ third_entite[1] }}</strong> cas signalés.
             </p>
+        </div>
+    </div>
+    <div class="main-content">
 
 
             <!-- Statistiques globales -->
@@ -83,6 +86,8 @@
             <div class="chart-container">
                 <canvas id="etatChart"></canvas>
             </div>
+    </div>
+    <div class="main-content">
 
             <!-- Top Entités -->
             <div class="top-list">
@@ -100,8 +105,7 @@
             </div>
 
             <!-- Bouton de mise à jour -->
-            <a href="{{ url_for('save_reclamation_summary') }}" class="btn-update">🔄 Mettre à jour les statistiques</a>
-        </section>
+            <a href="{{ url_for('save_reclamation_summary') }}" class="btn-add">🔄 Mettre à jour les statistiques</a>
     </div>
 
     <script>
@@ -161,5 +165,20 @@
             }
         });
     </script>
+    <script>
+    function toggleDrawer() {
+        document.getElementById('drawer').classList.toggle('open');
+    }
+
+    document.addEventListener('click', function(event) {
+        const drawer = document.getElementById('drawer');
+        const button = document.querySelector('.back-button');
+
+        if (drawer.classList.contains('open') && !drawer.contains(event.target) && !button.contains(event.target)) {
+            drawer.classList.remove('open');
+        }
+    });
+</script>
+
 </body>
 </html>

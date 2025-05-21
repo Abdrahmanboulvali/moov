@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Modifier Utilisateur</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_compt.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_t.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
@@ -18,7 +18,7 @@
     </nav>
 </header>
 
-<div class="container">
+<div class="main-content">
     <h2>Modifier Utilisateur</h2>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -51,13 +51,15 @@
         </div>
 
         <input type="hidden" name="password" id="hiddenPassword">
-        <button type="button" onclick="ouvrirModal()"><i class="fas fa-save"></i>&nbsp;Enregistrer les modifications</button>
+        <button type="button" onclick="ouvrirModal()">
+            <i class="fas fa-save"></i>&nbsp;Enregistrer les modifications
+        </button>
     </form>
 </div>
 
 <!-- Modal -->
-<div class="modal" id="modalMotDePasse">
-    <div class="modal-content">
+<div class="custom-modal" id="modalMotDePasse">
+    <div class="custom-modal-content">
         <p>Veuillez entrer votre mot de passe pour confirmer :</p>
         <input type="password" id="motDePasseSaisi" placeholder="Mot de passe">
         <div class="modal-buttons">
@@ -69,7 +71,7 @@
 
 <script>
     function ouvrirModal() {
-        document.getElementById('modalMotDePasse').style.display = 'block';
+        document.getElementById('modalMotDePasse').style.display = 'flex';
     }
 
     function fermerModal() {

@@ -400,12 +400,15 @@ def ajouter():
         date_saisie = request.form['date_saisie'] if request.form['date_saisie'] else datetime.now().strftime(
             '%Y-%m-%d %H:%M:%S')
 
+        date_pre_vid = request.form['date_pre_vid'] if request.form['date_pre_vid'] else datetime.now().strftime(
+            '%Y-%m-%d %H:%M:%S')
+
 
         date_ext = request.form['date_ext'] if request.form['date_ext'] else '2040-01-01 00:00:00'
 
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO reclamations (numero, canal, objet, login, etat_demande, cause_reclamation, contact, date_saisie, date_ext) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                    (numero, canal, objet, login, etat_demande, cause_reclamation, contact, date_saisie, date_ext))
+        cur.execute("INSERT INTO reclamations (numero, canal, objet, login, etat_demande, cause_reclamation, contact, date_saisie, date_prevue_vid, date_ext) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    (numero, canal, objet, login, etat_demande, cause_reclamation, contact, date_saisie, date_pre_vid, date_ext))
         mysql.connection.commit()
         cur.close()
         return redirect(url_for('index'))

@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>Analyse Temporelle</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_t.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </head>
 <body>
@@ -21,9 +22,9 @@
     <div class="main-content">
 
         <h1>Analyse temporelle des réclamations</h1>
-
-
+        <br>
         {% if reclamations_48h %}
+            <p>Dans les dernières 48 heures.</p>
             <table>
                 <thead>
                     <tr>
@@ -51,28 +52,26 @@
         {% else %}
             <p>Aucune réclamation dans les dernières 48 heures.</p>
         {% endif %}
-
+        <h3>1. Répartition par les utilisateurs</h3>
         <div class="chart-container">
-            <h2>Dans les 48 dernières heures (par utilisateur)</h2>
             <canvas id="chartLogin" width="1000" height="400"></canvas>
         </div>
-
+        <h3>2. Répartition par l'état</h3>
         <div class="chart-container">
-            <h2>Dans les 48 dernières heures (par état)</h2>
             <canvas id="chart48hEtat" width="1000" height="400"></canvas>
         </div>
-
+        <h3>3. Répartition par canal</h3>
         <div class="chart-container">
-            <h2>Dans les 48 dernières heures (par canal)</h2>
             <canvas id="chart48hCanal" width="1000" height="400"></canvas>
         </div>
+    </div>
+    <div class="main-content">
         <h1>Analyse mensuelles des réclamations</h1>
-        <a href="{{ url_for('update_stats_mensuelles') }}" class="btn-refresh">🔄 Rafraîchir les statistiques mensuelles</a>
+        <h3>Dans les dernières 12 mois (par etat)</h3>
         <div class="chart-container">
-            <h2>Dans les dernières 12 mois (par etat)</h2>
             <canvas id="etatParMoisChart" width="1000" height="400"></canvas>
         </div>
-        <h2>Dans les dernières 12 mois selon les catégories(par etat)</h2>
+        <h3>Dans les dernières 12 mois selon les catégories(par etat)</h3>
         <div class="btn-container">
             {% for cat in data_par_categorie %}
                 <button onclick="showChart('{{ cat }}')">Catégorie {{ cat }}</button>
@@ -80,26 +79,29 @@
         </div>
 
         <div class="chart-container">
-            <h2>Dans les dernières mois (par)</h2>
             <canvas id="etatChart" width="1000" height="400"></canvas>
         </div>
-
+        <a href="{{ url_for('update_stats_mensuelles') }}" class="btn-add">🔄 Rafraîchir les statistiques mensuelles</a>
+    </div>
+    <div class="main-content">
         <h2>Réclamations dans l'histoire</h2>
-        <a href="{{ url_for('update_stats_temporelles') }}" class="btn-refresh">🔄 Rafraîchir les statistiques</a>
+            <h3>1. Par jour</h3>
         <div class="chart-container">
-            <h2>Par jour</h2>
             <canvas id="chartJour" width="800" height="400"></canvas>
         </div>
+        <br>
 
+            <h3>2. Par mois</h3>
         <div class="chart-container">
-            <h2>Par mois</h2>
             <canvas id="chartMois" width="800" height="400"></canvas>
         </div>
-
+        <br>
+            <h3>3. Par année</h3>
         <div class="chart-container">
-            <h2>Par année</h2>
             <canvas id="chartAnnee" width="800" height="400"></canvas>
         </div>
+        <a href="{{ url_for('update_stats_temporelles') }}" class="btn-add">🔄 Rafraîchir les statistiques</a>
+
 
     </div>
 
@@ -298,6 +300,16 @@
         function showChart(cat) {
             const ctx = document.getElementById('etatChart').getContext('2d');
             const data = chartData[cat];
+
+            document.querySelectorAll('.btn-container button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const currentBtn = Array.from(document.querySelectorAll('.btn-container button'))
+                                    .find(btn => btn.textContent.includes(cat));
+            if (currentBtn) currentBtn.classList.add('active');
+
+            if (etatChart) etatChart.destroy();
 
             if (etatChart) etatChart.destroy();
 
