@@ -91,3 +91,13 @@ body.login-page {
         padding: 20px;
     }
 }
+button, .btn-add, button[type="submit"] {
+    background-color: #ff6f00;
+    color: white;
+    box-shadow: 0 4px 8px rgba(255,111,0,0.35);
+}
+
+button:hover, .btn-add:hover, button[type="submit"]:hover {
+    background-color: #ff9100;
+    box-shadow: 0 6px 14px rgba(255,145,0,0.45);
+}

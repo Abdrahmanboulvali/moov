@@ -27,8 +27,11 @@
               </a>
             </nav>
     </header>
-
+    <br>
     <div class="main-content">
+        <div class="btn-container" align="center">
+                <a href="{{ url_for('ajouter') }}" class="btn-add"><i class="fas fa-plus-circle"></i> Ajouter une reclamation</a>
+        </div>
 
 
         <h1>Liste des Réclamations</h1>
@@ -66,6 +69,7 @@
                 🔄 Mettre à jour les données
             </a>
     </div>
+    <br>
 
     <script>
         function toggleDrawer() {

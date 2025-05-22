@@ -555,3 +555,50 @@ h2 {
     word-break: break-word;
     max-width: 100%;
 }
+
+
+.login-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 40px 30px;
+    max-width: 400px;
+    margin: 80px auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+.login-container h2 {
+    text-align: center;
+    color: #0e4d92;
+    margin-bottom: 25px;
+    font-weight: 700;
+}
+.login-container input[type="text"],
+.login-container input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fffbea;
+    font-size: 1rem;
+}
+.login-container button {
+    width: 100%;
+    padding: 12px;
+    background-color: #0e4d92;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.login-container button:hover {
+    background-color: #092f5c;
+}
+.login-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}

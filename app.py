@@ -257,18 +257,14 @@ def modifier_utilisateur_admin(user_id):
     cur = mysql.connection.cursor()
 
     if request.method == 'POST':
-        prenom = request.form['prenom']
-        nom = request.form['nom']
-        sexe = request.form['sexe']
-        login = request.form['login']
         agence_id = request.form['agence_id']
         role = request.form['role']
 
         cur.execute("""
             UPDATE utilisateurs
-            SET prenom = %s, nom = %s, sexe = %s, login = %s, agence_id = %s, role = %s
+            SET agence_id = %s, role = %s
             WHERE id = %s
-        """, (prenom, nom, sexe, login, agence_id, role, user_id))
+        """, (agence_id, role, user_id))
         mysql.connection.commit()
         cur.close()
         flash("Utilisateur modifié avec succès.")
