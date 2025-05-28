@@ -10,16 +10,20 @@
     <header>
         <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-              <a class="navbar-brand d-flex align-items-center" href="#">
-                    <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
-              </a>
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
+            </a>
         </nav>
     </header>
-    <br><br>
 
     <div class="main-content">
         <h1>Modifier la Réclamation</h1>
         <form method="POST">
+            <!-- Numéro de réclamation -->
+            <div class="form-group">
+                <label for="numero">Numéro:</label>
+                <input type="text" id="numero" name="numero" value="{{ reclamation[5] }}" required>
+            </div>
 
             <!-- Objet -->
             <div class="form-group">
@@ -43,7 +47,7 @@
 
             <!-- État -->
             <div class="form-group">
-                <label for="etat">Etat:</label>
+                <label for="etat">État:</label>
                 <select id="etat" name="etat" required>
                     {% for etat in etats %}
                         <option value="{{ etat }}" {% if reclamation[4] == etat %}selected{% endif %}>{{ etat }}</option>
@@ -51,22 +55,21 @@
                 </select>
             </div>
 
-            <!-- Date de saisie -->
+            <!-- Cause de réclamation -->
             <div class="form-group">
-                <label for="date_saisie">Date de Saisie:</label>
-                <input type="datetime-local" id="date_saisie" name="date_saisie" value="{{ reclamation[8] | datetimeformat('%Y-%m-%d %H:%M:%S') }}" required>
+                <label for="cause_reclamation">Cause de la Réclamation:</label>
+                <input type="text" id="cause_reclamation" name="cause_reclamation" value="{{ reclamation[6] }}" required>
+            </div>
+
+            <!-- Contact -->
+            <div class="form-group">
+                <label for="contact">Contact:</label>
+                <input type="text" id="contact" name="contact" value="{{ reclamation[7] }}" required>
             </div>
 
 
-            <!-- Date de clôture -->
             <div class="form-group">
-                <label for="date_cloture">Date de Clôture:</label>
-                <input type="datetime-local" id="date_cloture" name="date_cloture" value="{{ reclamation[12] | datetimeformat('%Y-%m-%d %H:%M:%S') }}">
-            </div>
-
-
-            <div class="form-group">
-                <button type="submit">Modifier</button>
+                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
             </div>
         </form>
     </div>

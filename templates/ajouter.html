@@ -18,7 +18,7 @@
 <br>
 <div class="main-content">
     <h1 class="text-center mb-4">Ajouter une Réclamation</h1>
-    <form action="{{ url_for('ajouter') }}" method="POST">
+    <form action="{{ url_for('ajouter') }}" method="POST" id="form-reclamation">
         <label for="numero">Numéro :</label>
         <input type="number" id="numero" name="numero" required>
 
@@ -30,93 +30,191 @@
             {% endfor %}
         </select>
 
-        <label for="objet">Catégorie :</label>
-        <select id="objet" name="objet" required>
-            <option value="">-- Choisir une catégorie --</option>
-            {% for objet in objets %}
-                <option value="{{ objet }}">{{ objet }}</option>
-            {% endfor %}
-        </select>
+        <input type="hidden" id="login" name="login" value="{{ session['userlogin'] }}" required>
+        <input type="hidden" id="date_saisie" name="date_saisie" required value="{{ current_datetime[:10] }}">
 
-        <!-- Nouveau champ : affiché seulement si 'Réclamations' est sélectionné -->
-        <div id="sous_reclamation_container" style="display: none;">
-            <label for="sous_reclamation">Type de réclamation :</label>
-            <select id="sous_reclamation" name="sous_reclamation">
-                <option value="">-- Choisir un type --</option>
-                <option value="FACTURE">FACTURE</option>
-                <option value="RECLAMATION CLIENTS">RECLAMATION CLIENTS</option>
-                <option value="TECHNIQUE">TECHNIQUE</option>
-            </select>
+        <div id="categories-container">
+            <div class="select-container" data-level="0">
+                <label for="categorie-level-0">Catégorie :</label>
+                <select id="categorie-level-0" name="categorie" required>
+                    <option value="">-- Choisir une catégorie --</option>
+                    {% for objet in objets if objet.type != 'p' %}
+                        <option value="{{ objet.code }}">{{ objet.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
-        <input type="hidden" id="login" name="login" value="{{ session['userlogin'] }}" required>
-
-        <div id="etat_container" style="display: none;">
-            <label for="etat_demande">État de la demande :</label>
+        <div id="etat-container" style="display:none;">
+            <label for="etat_demande">Etat :</label>
             <select id="etat_demande" name="etat_demande">
-                <option value="">-- Choisir un état --</option>
-                {% for etat in etats %}
+                <option value="">-- Choisir une etat --</option>
+                {% for etat in etat_demande %}
                     <option value="{{ etat }}">{{ etat }}</option>
                 {% endfor %}
             </select>
         </div>
 
+        <input type="hidden" id="selected_sous_reclamation" name="sous_reclamation" value="">
+        <input type="hidden" id="date_prevue_vid" name="date_prevue_vid" readonly>
+
         <label for="contact">Contact :</label>
-        <input type="text" id="contact" name="contact" required>
+        <input type="text" id="contact" name="contact">
 
         <label for="cause_reclamation">Cause de la réclamation :</label>
-        <textarea id="cause_reclamation" name="cause_reclamation" rows="4" required></textarea>
+        <textarea id="cause_reclamation" name="cause_reclamation" rows="4"></textarea>
 
-        <label for="date_saisie">Date de saisie :</label>
-        <input type="datetime-local" id="date_saisie" name="date_saisie" value="{{ current_datetime }}" />
-
-        <label for="date_pre_vid">Date de prévue VID :</label>
-        <input type="datetime-local" id="date_pre_vid" name="date_pre_vid" value="{{ current_datetime }}" />
-
-        <label for="date_ext">Date de clôture :</label>
-        <input type="datetime-local" id="date_ext" name="date_ext" value="2040-01-01T00:00" />
+        <input type="hidden" id="date_ext" name="date_ext" value="2040-01-01T00:00" />
 
         <br><br>
         <button type="submit" class="btn btn-primary w-100">Soumettre</button>
     </form>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const objetSelect = document.getElementById('objet');
-            const etatSelect = document.getElementById('etat_demande');
-            const etatContainer = document.getElementById('etat_container');
-            const sousReclamationContainer = document.getElementById('sous_reclamation_container');
-
-            objetSelect.addEventListener('change', function () {
-                const selectedObjet = objetSelect.value.toLowerCase();
-
-                // État automatique pour certains cas
-                if (selectedObjet.includes("renseignement") || selectedObjet.includes("appel coupé")) {
-                    const clotureOption = Array.from(etatSelect.options).find(option =>
-                        option.value.toLowerCase().includes('clôturé n0')
-                    );
-                    if (clotureOption) {
-                        etatSelect.value = clotureOption.value;
-                    }
-                    etatContainer.style.display = 'none';
-                } else if (selectedObjet.includes("sav") || selectedObjet.includes("reclamations")) {
-                    etatSelect.value = '';
-                    etatContainer.style.display = 'block';
-                } else {
-                    etatSelect.value = '';
-                    etatContainer.style.display = 'none';
-                }
-
-                // Affichage du champ sous_reclamation
-                if (selectedObjet.includes("reclamations")) {
-                    sousReclamationContainer.style.display = 'block';
-                } else {
-                    sousReclamationContainer.style.display = 'none';
-                }
-            });
-        });
-    </script>
 </div>
-<br>
+
+<script>
+    const objets = {{ objets|tojson }};
+    const etatContainer = document.getElementById('etat-container');
+    const etatSelect = document.getElementById('etat_demande');
+    const container = document.getElementById('categories-container');
+    const hiddenSousReclamation = document.getElementById('selected_sous_reclamation');
+    const dateSaisieInput = document.getElementById('date_saisie');
+    const datePrevueInput = document.getElementById('date_prevue_vid');
+
+    function findObjetByCode(code, nodes = objets) {
+        for (const node of nodes) {
+            if (node.code === code) return node;
+            if (node.sous_objets && node.sous_objets.length > 0) {
+                const found = findObjetByCode(code, node.sous_objets);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+
+    function addDays(date, days) {
+        const result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
+    }
+
+    function updateDatePrevue() {
+        const selectedCode = hiddenSousReclamation.value;
+        const dateSaisieValue = dateSaisieInput.value;
+
+        if (!selectedCode || !dateSaisieValue) {
+            datePrevueInput.value = '';
+            return;
+        }
+
+        const objet = findObjetByCode(selectedCode);
+        if (!objet || !objet.delai) {
+            datePrevueInput.value = '';
+            return;
+        }
+
+        const delaiDays = parseInt(objet.delai);
+        if (isNaN(delaiDays)) {
+            datePrevueInput.value = '';
+            return;
+        }
+
+        const dateSaisieDate = new Date(dateSaisieValue);
+        const newDate = addDays(dateSaisieDate, delaiDays);
+
+        const yyyy = newDate.getFullYear();
+        const mm = String(newDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(newDate.getDate()).padStart(2, '0');
+
+        datePrevueInput.value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    function handleEtatDemandeDisplay(selectedCode) {
+        const objet = findObjetByCode(selectedCode);
+
+        if (objet && (objet.label === 'SAV' || objet.label === 'RECLAMATIONS')) {
+            etatSelect.disabled = false;
+            etatContainer.style.display = 'block';
+            etatSelect.required = true;
+            etatSelect.value = '';
+        } else {
+            etatSelect.value = 'Cloturé N0';
+            etatSelect.disabled = true;
+            etatContainer.style.display = 'none';
+            etatSelect.required = false;
+        }
+    }
+
+    function onCategorieChange(event) {
+        const select = event.target;
+        const level = parseInt(select.parentElement.dataset.level);
+
+        // حذف أي قوائم اختيار بمستوى أعلى من هذا
+        const containers = Array.from(container.querySelectorAll('.select-container'));
+        containers.forEach(c => {
+            if (parseInt(c.dataset.level) > level) {
+                c.remove();
+            }
+        });
+
+        const selectedCode = select.value;
+        hiddenSousReclamation.value = selectedCode || '';
+
+        handleEtatDemandeDisplay(selectedCode);
+        updateDatePrevue();
+
+        if (!selectedCode) {
+            return;
+        }
+
+        const objet = findObjetByCode(selectedCode);
+        if (!objet) return;
+
+        if (objet.type && objet.type.toLowerCase() === 'p') {
+            return;
+        }
+
+        if (objet.sous_objets && objet.sous_objets.length > 0) {
+            const newLevel = level + 1;
+            const div = document.createElement('div');
+            div.className = 'select-container';
+            div.dataset.level = newLevel;
+
+            const label = document.createElement('label');
+            label.htmlFor = `categorie-level-${newLevel}`;
+            label.textContent = 'Sous-catégorie :';
+
+            const selectNew = document.createElement('select');
+            selectNew.id = `categorie-level-${newLevel}`;
+            selectNew.name = `categorie-level-${newLevel}`;
+            selectNew.required = true;
+
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '-- Choisir une sous-catégorie --';
+            selectNew.appendChild(defaultOption);
+
+            objet.sous_objets.forEach(so => {
+                const option = document.createElement('option');
+                option.value = so.code;
+                option.textContent = so.label;
+                selectNew.appendChild(option);
+            });
+
+            div.appendChild(label);
+            div.appendChild(selectNew);
+            container.appendChild(div);
+
+            selectNew.addEventListener('change', onCategorieChange);
+        }
+    }
+
+    dateSaisieInput.addEventListener('change', updateDatePrevue);
+    document.getElementById('categorie-level-0').addEventListener('change', onCategorieChange);
+
+    // عند تحميل الصفحة، إخفاء حالة الطلب أو تعيينها حسب القيمة المختارة (إن وجدت)
+    handleEtatDemandeDisplay(hiddenSousReclamation.value);
+
+</script>
+
 </body>
 </html>

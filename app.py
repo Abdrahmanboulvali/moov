@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_mysqldb import MySQL
 import json
 from collections import defaultdict
 from datetime import datetime, timedelta
+from MySQLdb.cursors import DictCursor
 
 app = Flask(__name__)
 
@@ -382,47 +383,126 @@ def changer_mot_de_passe():
 
     return render_template('changer_mot_de_passe.html')
 
+
 @app.route('/ajouter', methods=['GET', 'POST'])
 def ajouter():
     if request.method == 'POST':
         numero = request.form['numero']
         canal = request.form['canal']
-        objet = request.form['objet']
+        sous_reclamation = request.form.get('sous_reclamation', '')
         login = request.form['login']
-        etat_demande = request.form['etat_demande']
         cause_reclamation = request.form['cause_reclamation']
         contact = request.form['contact']
+        etat_demande = request.form.get('etat_demande')
+        if not etat_demande:
+            etat_demande = "Clôturé N0"
 
-        date_saisie = request.form['date_saisie'] if request.form['date_saisie'] else datetime.now().strftime(
-            '%Y-%m-%d %H:%M:%S')
+        date_saisie = datetime.now()
 
-        date_pre_vid = request.form['date_pre_vid'] if request.form['date_pre_vid'] else datetime.now().strftime(
-            '%Y-%m-%d %H:%M:%S')
-
-
-        date_ext = request.form['date_ext'] if request.form['date_ext'] else '2040-01-01 00:00:00'
 
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO reclamations (numero, canal, objet, login, etat_demande, cause_reclamation, contact, date_saisie, date_prevue_vid, date_ext) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                    (numero, canal, objet, login, etat_demande, cause_reclamation, contact, date_saisie, date_pre_vid, date_ext))
+        cur.execute("""
+            SELECT libelle, delai, etat
+            FROM structure_gdr
+            WHERE arborescence = %s
+        """, (sous_reclamation,))
+        row = cur.fetchone()
+
+        if row:
+            objet_libelle = row[0]
+            delai_jours = row[1] or 0
+            etat_demande_auto = row[2] or ''
+        else:
+            objet_libelle = sous_reclamation
+            delai_jours = 0
+            etat_demande_auto = ''
+
+
+        date_pre_vid = date_saisie + timedelta(days=delai_jours)
+
+
+        date_ext_str = request.form['date_ext']
+        if date_ext_str:
+            date_ext = datetime.strptime(date_ext_str, '%Y-%m-%dT%H:%M')
+        else:
+            date_ext = datetime(2040, 1, 1)
+
+
+        cur.execute("""
+            INSERT INTO reclamations
+            (numero, canal, objet, login, etat_demande, cause_reclamation, contact, date_saisie, date_prevue_vid, date_ext)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            numero, canal, objet_libelle, login, etat_demande, cause_reclamation, contact,
+            date_saisie.strftime('%Y-%m-%d %H:%M:%S'),
+            date_pre_vid.strftime('%Y-%m-%d %H:%M:%S'),
+            date_ext.strftime('%Y-%m-%d %H:%M:%S')
+        ))
+
         mysql.connection.commit()
         cur.close()
         return redirect(url_for('index'))
 
-    # Pour GET
+
     cur = mysql.connection.cursor()
+
+    cur.execute("""
+        SELECT arborescence, libelle, delai, etat, type
+        FROM structure_gdr
+        WHERE niveau = 0 AND paire = 0 AND etat = 1 AND (type = 'M' OR type = 'P')
+        ORDER BY CASE WHEN type = 'P' THEN 0 ELSE 1 END, arborescence
+    """)
+    raw_roots = cur.fetchall()
+
+    objets = []
+    for row in raw_roots:
+        arbo = row[0]
+        libelle = row[1]
+        delai = row[2] or 0
+        etat_par_defaut = row[3] or ''
+        type_ = row[4]
+
+
+        if type_ == 'P':
+            objets.append({
+                'code': arbo,
+                'label': libelle,
+                'sous_objets': []
+            })
+        else:
+
+            cur.execute("""
+                SELECT arborescence, libelle
+                FROM structure_gdr
+                WHERE arborescence LIKE %s AND paire != 0
+            """, (arbo + '%',))
+            sous_raw = cur.fetchall()
+            sous_objets = [{'code': s[0], 'label': s[1]} for s in sous_raw]
+
+            objets.append({
+                'code': arbo,
+                'label': libelle,
+                'sous_objets': sous_objets
+            })
+
+
     cur.execute("SELECT DISTINCT canal FROM reclamations")
     canaux = [row[0] for row in cur.fetchall()]
+
     cur.execute("SELECT DISTINCT etat_demande FROM reclamations")
-    etats = [row[0] for row in cur.fetchall()]
-    cur.execute("""
-    SELECT DISTINCT libelle
-    FROM structure_gdr
-    WHERE LEFT(arborescence, 2) IN ('1X', '2X', '3X', '4X') LIMIT 4;
-    """)
-    objets = [row[0] for row in cur.fetchall()]
+    etat_demande = [row[0] for row in cur.fetchall()]
+
     cur.close()
-    return render_template('ajouter.html', canaux=canaux, etats=etats, objets=objets)
+
+    current_datetime = datetime.now().strftime('%Y-%m-%dT%H:%M')
+
+    return render_template(
+        'ajouter.html',
+        objets=objets,
+        canaux=canaux,
+        etat_demande=etat_demande,
+        current_datetime=current_datetime
+    )
 
 
 @app.route('/modifier_reclamation/<int:id>', methods=['GET', 'POST'])
@@ -431,21 +511,40 @@ def modifier_reclamation(id):
 
     if request.method == 'POST':
         objet = request.form['objet']
+        entite = request.form.get('entite', '')
+        login = request.form['login']
         canal = request.form['canal']
-        date_saisie = request.form['date_saisie']
-        date_cloture = request.form['date_cloture']
         etat = request.form['etat']
+        numero = request.form['numero']
+        cause_reclamation = request.form.get('cause_reclamation', '')
+        contact = request.form.get('contact', '')
+        date_saisie = request.form['date_saisie']
+        date_prevue_vid = request.form.get('date_prevue_vid') or None
+        rem_saisie = request.form.get('rem_saisie', '')
+        date_ext = request.form.get('date_ext') or None
+        date_clo = request.form.get('date_clo') or None
+        rem_clo = request.form.get('rem_clo', '')
+        user_id = request.form.get('user_id', None)
 
         cur.execute("""
-            UPDATE reclamations 
-            SET objet = %s, canal = %s, date_saisie = %s, date_ext = %s, etat_demande = %s 
+            UPDATE reclamations
+            SET objet = %s, entite = %s, login = %s, canal = %s, etat_demande = %s,
+                numero = %s, cause_reclamation = %s, contact = %s,
+                date_saisie = %s, date_prevue_vid = %s, rem_saisie = %s,
+                date_ext = %s, date_clo = %s, rem_clo = %s, user_id = %s
             WHERE id = %s
-        """, (objet, canal, date_saisie, date_cloture, etat, id))
+        """, (
+            objet, entite, login, canal, etat,
+            numero, cause_reclamation, contact,
+            date_saisie, date_prevue_vid, rem_saisie,
+            date_ext, date_clo, rem_clo, user_id,
+            id
+        ))
         mysql.connection.commit()
         cur.close()
         return redirect(url_for('index'))
 
-    # Récupérer les infos de la réclamation à modifier
+
     cur.execute("SELECT * FROM reclamations WHERE id = %s", (id,))
     reclamation = cur.fetchone()
 
@@ -453,13 +552,14 @@ def modifier_reclamation(id):
         cur.close()
         return "Réclamation non trouvée", 404
 
-    # Récupérer les listes des objets et canaux
+
     cur.execute("""
-    SELECT DISTINCT libelle
-    FROM structure_gdr
-    WHERE LEFT(arborescence, 2) IN ('1X', '2X', '3X', '4X') LIMIT 4;
+        SELECT DISTINCT libelle
+        FROM structure_gdr
+        WHERE LEFT(arborescence, 2) IN ('1X', '2X', '3X', '4X') LIMIT 4;
     """)
     objets = [row[0] for row in cur.fetchall()]
+
     cur.execute("SELECT DISTINCT etat_demande FROM reclamations")
     etats = [row[0] for row in cur.fetchall()]
 
@@ -468,11 +568,13 @@ def modifier_reclamation(id):
 
     cur.close()
 
-    return render_template('modifier_reclamation.html',
-                           reclamation=reclamation,
-                           objets=objets,
-                           canaux=canaux,
-                           etats=etats)
+    return render_template(
+        'modifier_reclamation.html',
+        reclamation=reclamation,
+        objets=objets,
+        canaux=canaux,
+        etats=etats
+    )
 
 
 @app.route('/supprimer_reclamation/<int:id>')
@@ -916,18 +1018,49 @@ def structure_gdr():
     cur.close()
     return render_template('structure_gdr.html', structure_gdr=results)
 
+
+
 @app.route('/reclamations')
 def reclamations():
-    message = request.args.get('message')
+    q = request.args.get('q', '').strip()
+    return render_template('reclamations.html', q=q)
 
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM reclamations_cached LIMIT 1000")
-    column_names = [desc[0] for desc in cur.description]
-    results = [dict(zip(column_names, row)) for row in cur.fetchall()]
+# API لجلب النتائج بشكل JSON حسب الصفحة والبحث
+@app.route('/api/reclamations')
+def api_reclamations():
+    page = int(request.args.get('page', 1))
+    q = request.args.get('q', '').strip()
+    per_page = 10
+    offset = (page - 1) * per_page
+
+    cur = mysql.connection.cursor(DictCursor)
+
+    params = []
+    base_query = "SELECT numero, objet, entite, canal, etat_demande, cause_reclamation, date_saisie FROM reclamations_cached WHERE date_saisie != '0000-00-00 00:00:00' "
+    count_query = "SELECT COUNT(*) as count FROM reclamations_cached WHERE date_saisie != '0000-00-00 00:00:00' "
+
+    if q:
+        base_query += "AND MATCH(numero, objet, entite, canal, cause_reclamation) AGAINST (%s IN BOOLEAN MODE) "
+        count_query += "AND MATCH(numero, objet, entite, canal, cause_reclamation) AGAINST (%s IN BOOLEAN MODE) "
+        params.append(q + '*')
+
+    base_query += "ORDER BY date_saisie DESC LIMIT %s OFFSET %s"
+    params.extend([per_page, offset])
+
+    cur.execute(base_query, params)
+    reclamations = cur.fetchall()
+
+    cur.execute(count_query, params[:-2] if q else [])
+    total_count = cur.fetchone()['count']
+
     cur.close()
 
-    return render_template('reclamations.html', reclamations=results, message=message)
-
+    return jsonify({
+        "reclamations": reclamations,
+        "page": page,
+        "per_page": per_page,
+        "total_count": total_count
+    })
 
 @app.route('/update_cache')
 def update_cache():

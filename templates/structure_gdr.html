@@ -20,45 +20,67 @@
 
     <!-- JS personnalisé -->
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+    <style>
+        .table-container {
+            overflow-x: auto;
+            background-color: white;
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        table.dataTable {
+            white-space: nowrap;
+        }
+
+        table.dataTable th, table.dataTable td {
+            padding: 10px;
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
 </head>
 <body>
     <header>
         <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-              <a class="navbar-brand d-flex align-items-center" href="#">
-                    <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
-              </a>
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
+            </a>
         </nav>
     </header>
     <br>
+
     <div class="main-content">
-
-
         <h2>Structure</h2>
 
         {% if structure_gdr %}
-        <table id="structureTable" class="display nowrap data-table" style="width:100%">
-            <thead>
-                <tr>
-                    {% for col in structure_gdr[0].keys() %}
-                        <th>{{ col }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in structure_gdr %}
+        <div class="table-container">
+            <table id="structureTable" class="display nowrap" style="width:100%">
+                <thead>
                     <tr>
-                        {% for val in row.values() %}
-                            <td>{{ val }}</td>
+                        {% for col in structure_gdr[0].keys() %}
+                            <th>{{ col }}</th>
                         {% endfor %}
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for row in structure_gdr %}
+                        <tr>
+                            {% for val in row.values() %}
+                                <td>{{ val }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         {% else %}
             <p>Aucune donnée à afficher.</p>
         {% endif %}
     </div>
+    <br>
 
     <script>
         function toggleDrawer() {
@@ -69,7 +91,9 @@
     <script>
         $(document).ready(function () {
             $('#structureTable').DataTable({
-                responsive: true,
+                scrollX: true,
+                responsive: false,
+                autoWidth: false,
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json"
                 }

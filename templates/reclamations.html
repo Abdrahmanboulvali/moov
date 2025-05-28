@@ -1,89 +1,172 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Liste des Réclamations</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_t.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.0/css/responsive.dataTables.min.css">
-
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- DataTables JS -->
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_t.css') }}" />
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        th { background-color: #f2f2f2; }
+        form { margin-bottom: 20px; text-align: center; }
+        input[type="text"] { padding: 5px; width: 250px; }
+        button { padding: 5px 10px; cursor: pointer; }
+        .pagination { margin-top: 20px; text-align: center; }
+        .pagination button {
+            margin: 0 3px;
+            padding: 6px 12px;
+            cursor: pointer;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+        }
+        .pagination button.disabled {
+            background-color: #ccc;
+            cursor: default;
+        }
+        .pagination button.active {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <header>
         <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-              <a class="navbar-brand d-flex align-items-center" href="#">
-                    <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
-              </a>
-            </nav>
     </header>
-    <br>
+    <br />
     <div class="main-content">
-        <div class="btn-container" align="center">
-                <a href="{{ url_for('ajouter') }}" class="btn-add"><i class="fas fa-plus-circle"></i> Ajouter une reclamation</a>
-        </div>
+        <h1 align="center">Liste des Réclamations</h1>
+        <br />
 
+        <form id="search-form">
+            <input type="text" id="search-input" name="q" placeholder="Rechercher..." value="{{ q or '' }}" pattern="\d*" inputmode="numeric" />
+            <button type="submit">🔍</button>
+        </form>
 
-        <h1>Liste des Réclamations</h1>
-
-        {% if message %}
-            <div class="alert alert-info">{{ message }}</div>
-        {% endif %}
-        <div class="btn-container">
-            
-        </div>
-
-        {% if reclamations %}
-        <table id="reclamationsTable" class="display nowrap" style="width:100%">
+        <table id="results-table" style="display:none;">
             <thead>
                 <tr>
-                    {% for col in reclamations[0].keys() %}
-                        <th>{{ col }}</th>
-                    {% endfor %}
+                    <th>Numéro</th>
+                    <th>Objet</th>
+                    <th>Entité</th>
+                    <th>Canal</th>
+                    <th>État</th>
+                    <th>Cause</th>
+                    <th>Date</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for row in reclamations %}
-                    <tr>
-                        {% for val in row.values() %}
-                            <td>{{ val }}</td>
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </tbody>
+            <tbody id="results-body"></tbody>
         </table>
-        {% else %}
-            <p>Aucune réclamation trouvée.</p>
-        {% endif %}
-        <a href="{{ url_for('update_cache') }}" class="btn-add">
-                🔄 Mettre à jour les données
-            </a>
-    </div>
-    <br>
 
+        <p id="no-results" style="text-align:center; display:none;">Aucune réclamation trouvée.</p>
+
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        function toggleDrawer() {
-            document.getElementById('drawer').classList.toggle('open');
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentQuery = "{{ q or '' }}";
+        const perPage = 10; // عدد النتائج في كل صفحة
+
+        function fetchResults(page) {
+            $('#results-table').hide();
+            $('#no-results').hide();
+            $('#pagination').hide();
+
+            $.getJSON("{{ url_for('api_reclamations') }}", { page: page, q: currentQuery, per_page: perPage }, function(data) {
+                const reclamations = data.reclamations;
+                totalPages = Math.ceil(data.total_count / perPage);
+                currentPage = data.page;
+
+                if (reclamations.length === 0) {
+                    $('#results-table').hide();
+                    $('#no-results').show();
+                    $('#pagination').hide();
+                    return;
+                }
+
+                // عرض النتائج في الجدول
+                let html = '';
+                reclamations.forEach(function(rec) {
+                    html += `<tr>
+                        <td>${rec.numero}</td>
+                        <td>${rec.objet}</td>
+                        <td>${rec.entite}</td>
+                        <td>${rec.canal}</td>
+                        <td>${rec.etat_demande}</td>
+                        <td>${rec.cause_reclamation}</td>
+                        <td>${rec.date_saisie}</td>
+                    </tr>`;
+                });
+                $('#results-body').html(html);
+                $('#results-table').show();
+
+                // إنشاء أزرار التنقل بالصفحات
+                renderPagination();
+            }).fail(function() {
+                alert("Erreur lors du chargement des données.");
+            });
         }
 
-        $(document).ready(function () {
-            $('#reclamationsTable').DataTable({
-                responsive: true,
-                language: {
-                    url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json"
+        function renderPagination() {
+            let html = '';
+
+            // زر السابق
+            if (currentPage > 1) {
+                html += `<button data-page="${currentPage - 1}">← Précédente</button>`;
+            } else {
+                html += `<button class="disabled" disabled>← Précédente</button>`;
+            }
+
+            // أزرار الصفحات (مثلاً عرض 5 أزرار حول الصفحة الحالية)
+            let start = Math.max(1, currentPage - 2);
+            let end = Math.min(totalPages, currentPage + 2);
+            for(let i = start; i <= end; i++) {
+                if(i === currentPage) {
+                    html += `<button class="active" data-page="${i}">${i}</button>`;
+                } else {
+                    html += `<button data-page="${i}">${i}</button>`;
                 }
+            }
+
+            // زر التالي
+            if (currentPage < totalPages) {
+                html += `<button data-page="${currentPage + 1}">Suivante →</button>`;
+            } else {
+                html += `<button class="disabled" disabled>Suivante →</button>`;
+            }
+
+            $('#pagination').html(html).show();
+
+            // تعيين أحداث النقر على أزرار الصفحات
+            $('#pagination button').not('.disabled').not('.active').click(function() {
+                const page = $(this).data('page');
+                fetchResults(page);
+            });
+        }
+
+        $(document).ready(function() {
+            // عند تحميل الصفحة، جلب النتائج الأولى
+            fetchResults(1);
+
+            // عند البحث، منع إعادة تحميل الصفحة وإرسال الطلب AJAX
+            $('#search-form').submit(function(e) {
+                e.preventDefault();
+                currentQuery = $('#search-input').val().trim();
+                currentPage = 1;
+                fetchResults(currentPage);
             });
         });
     </script>
+    <script>
+document.getElementById('search-input').addEventListener('input', function(e) {
+    this.value = this.value.replace(/\D/g, '');  // إزالة كل شيء غير الأرقام
+});
+</script>
+
 </body>
 </html>
