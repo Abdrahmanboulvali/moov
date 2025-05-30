@@ -1,16 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Page - Generale</title>
+    <title>Page - General</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-    <!-- DataTables -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_t.css') }}">
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
 </head>
 <body>
     <!-- Drawer -->
@@ -18,15 +14,16 @@
         <h2>Menu</h2>
         <ul>
             <li><a href="{{ url_for('reclamations') }}"><i class="fas fa-file-alt"></i> Reclamations</a></li>
+            <li><a href="{{ url_for('Mes_reclamations') }}"><i class="fas fa-clock"></i> Mes activités</a></li>
             <li><a href="{{ url_for('statistiques') }}"><i class="fas fa-chart-bar"></i> Statistiques</a></li>
             <li><a href="{{ url_for('analyse_temporelle') }}"><i class="fas fa-clock"></i> Analyse temporelle</a></li>
-            <li><a href="{{ url_for('profil', id=session['user_id']) }}"><i class="fas fa-user"></i> Profil</a></li>
+            <li><a href="{{ url_for('profil') }}"><i class="fas fa-user"></i> Profil</a></li>
             <li><a href="{{ url_for('se_deconnecter') }}" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Se déconnecter</a></li>
         </ul>
     </div>
 
     <!-- Contenu principal -->
-    <div class="main-content">
+
         <header>
             <button class="back-button" onclick="toggleDrawer()">☰</button>
             <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
@@ -34,57 +31,153 @@
                     <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
               </a>
             </nav>
+
         </header>
-        <br>
-        <br>
-        <section class="dashboard">
-            <!-- Tableau pour afficher les demandes de l'utilisateur avec DataTables -->
-            <h2>Mes Activités</h2>
-            <div class="btn-container" align="center">
-                <a href="{{ url_for('ajouter') }}" class="btn-add"><i class="fas fa-plus-circle"></i> Ajouter une reclamation</a>
-            </div>
-            <table id="myTable" class="display" cellspacing="0" width="100%">
-                <thead>
-                    <tr>
-                        <th>Numéro</th>
-                        <th>Objet</th>
-                        <th>Canal</th>
-                        <th>Date de Saisie</th>
-                        <th>Date de Clôture</th>
-                        <th>État</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for reclamation in reclamations %}
-                        <tr>
-                            <td>{{ reclamation[0]}}</td>
-                            <td>{{ reclamation[1]}}</td>
-                            <td>{{ reclamation[2]}}</td>
-                            <td>{{ reclamation[3]}}</td>
-                            <td>{{ reclamation[4]}}</td>
-                            <td>{{ reclamation[5]}}</td>
-                            <td>
-                                <a href="{{ url_for('modifier_reclamation', id=reclamation[6]) }}" class="btn-edit"><i class="fas fa-edit"></i>&nbsp;Modifier</a>
-                                <a href="{{ url_for('supprimer_reclamation', id=reclamation[6]) }}" class="btn-delete" onclick="return confirm('Êtes-vous sûr ?')"><i class="fas fa-trash-alt"></i>&nbsp;Supprimer</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </section>
+    <br>
+    <div class="main-content">
+            <p class="update-time">Dernière mise à jour : {{ created_at }}</p>
+
+            <!-- Résumé -->
+            {% set top_etat_sorted = top_etats|dictsort(false, 'value') %}
+            {% set top_etat = top_etat_sorted[2] if top_etat_sorted else ['', 0] %}
+            {% set second_etat = top_etat_sorted[1] if top_etat_sorted|length > 1 else ['', 0] %}
+            {% set third_etat = top_etat_sorted[0] if top_etat_sorted|length > 2 else ['', 0] %}
+
+            {% set top_entite_sorted = top_entites|dictsort(false, 'value') %}
+            {% set top_entite = top_entite_sorted[2] if top_entite_sorted else ['', 0] %}
+            {% set second_entite = top_entite_sorted[1] if top_entite_sorted|length > 1 else ['', 0] %}
+            {% set third_entite = top_entite_sorted[0] if top_entite_sorted|length > 2 else ['', 0] %}
+        <div class="resume-stats">
+            <p>
+                Le nombre total de réclamations enregistrées est de <strong>{{ total }}</strong>.<br>
+                L'état le plus fréquent est <strong>{{ top_etat[0] }}</strong> avec <strong>{{ top_etat[1] }}</strong> réclamations.
+                suivi de <strong>{{ second_etat[0] }}</strong> avec <strong>{{ second_etat[1] }}</strong> réclamations.
+                puis <strong>{{ third_etat[0] }}</strong> avec <strong>{{ third_etat[1] }}</strong> réclamations.<br>
+                L'entité la plus concernée est <strong>{{ top_entite[0] }}</strong> avec <strong>{{ top_entite[1] }}</strong> cas signalés.
+                suivi de <strong>{{ second_entite[0] }}</strong> avec <strong>{{ second_entite[1] }}</strong> cas signalés.
+                puis <strong>{{ third_entite[0] }}</strong> avec <strong>{{ third_entite[1] }}</strong> cas signalés.
+            </p>
+        </div>
     </div>
+    <div class="main-content">
+
+
+            <!-- Statistiques globales -->
+            <div class="stats-cards">
+                <div class="card">
+                    <h3>Total Réclamations</h3>
+                    <p>{{ total }}</p>
+                </div>
+            </div>
+
+            <!-- Top États -->
+            <div class="top-list">
+                <h2>Top 3 États</h2>
+                <ul>
+                    {% for etat, count in top_etats.items() %}
+                        <li>{{ etat }} : {{ count }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Graphe des États -->
+            <div class="chart-container">
+                <canvas id="etatChart"></canvas>
+            </div>
+    </div>
+    <div class="main-content">
+
+            <!-- Top Entités -->
+            <div class="top-list">
+                <h2>Top 3 Entités</h2>
+                <ul>
+                    {% for entite, count in top_entites.items() %}
+                        <li>{{ entite }} : {{ count }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Graphe des Entités -->
+            <div class="chart-container">
+                <canvas id="entiteChart"></canvas>
+            </div>
+
+            <!-- Bouton de mise à jour -->
+            <a href="{{ url_for('save_reclamation_summary') }}" class="btn-add">🔄 Mettre à jour les statistiques</a>
+    </div>
+    <br>
 
     <script>
-
-        $(document).ready(function() {
-            $('#myTable').DataTable();
-        });
-
         function toggleDrawer() {
             document.getElementById('drawer').classList.toggle('open');
         }
+
+        // Top États
+        const etatLabels = {{ top_etats.keys() | list | tojson }};
+        const etatData = {{ top_etats.values() | list | tojson }};
+
+        const ctxEtat = document.getElementById('etatChart').getContext('2d');
+        new Chart(ctxEtat, {
+            type: 'bar',
+            data: {
+                labels: etatLabels,
+                datasets: [{
+                    label: 'Nombre de Réclamations',
+                    data: etatData,
+                    backgroundColor: '#42a5f5'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Répartition par État'
+                    }
+                }
+            }
+        });
+
+        // Top Entités
+        const entiteLabels = {{ top_entites.keys() | list | tojson }};
+        const entiteData = {{ top_entites.values() | list | tojson }};
+
+        const ctxEntite = document.getElementById('entiteChart').getContext('2d');
+        new Chart(ctxEntite, {
+            type: 'bar',
+            data: {
+                labels: entiteLabels,
+                datasets: [{
+                    label: 'Nombre de Réclamations',
+                    data: entiteData,
+                    backgroundColor: '#66bb6a'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Répartition par Entité'
+                    }
+                }
+            }
+        });
     </script>
+    <script>
+    function toggleDrawer() {
+        document.getElementById('drawer').classList.toggle('open');
+    }
+
+    document.addEventListener('click', function(event) {
+        const drawer = document.getElementById('drawer');
+        const button = document.querySelector('.back-button');
+
+        if (drawer.classList.contains('open') && !drawer.contains(event.target) && !button.contains(event.target)) {
+            drawer.classList.remove('open');
+        }
+    });
+</script>
 
 </body>
 </html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Page - Generale</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_t.css') }}">
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</head>
+<body>
+    <header>
+        <a href="{{ url_for('index') }}" class="back-button">← Retour</a>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+              <a class="navbar-brand d-flex align-items-center" href="#">
+                    <img src="{{ url_for('static', filename='images/img.png') }}" alt="Logo Moov" height="40" class="me-2">
+              </a>
+        </nav>
+    </header>
+    <br>
+
+    <!-- Contenu principal -->
+    <div class="main-content">
+        <br>
+        <br>
+        <section class="dashboard">
+            <!-- Tableau pour afficher les demandes de l'utilisateur avec DataTables -->
+            <h2>Mes Activités</h2>
+            <div class="btn-container" align="center">
+                <a href="{{ url_for('ajouter') }}" class="btn-add"><i class="fas fa-plus-circle"></i> Ajouter une reclamation</a>
+            </div>
+            <table id="myTable" class="display" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Numéro</th>
+                        <th>Objet</th>
+                        <th>Canal</th>
+                        <th>Date de Saisie</th>
+                        <th>Date de Clôture</th>
+                        <th>État</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reclamation in reclamations %}
+                        <tr>
+                            <td>{{ reclamation[0]}}</td>
+                            <td>{{ reclamation[1]}}</td>
+                            <td>{{ reclamation[2]}}</td>
+                            <td>{{ reclamation[3]}}</td>
+                            <td>{{ reclamation[4]}}</td>
+                            <td>{{ reclamation[5]}}</td>
+                            <td>
+                                <a href="{{ url_for('modifier_reclamation', id=reclamation[6]) }}" class="btn-edit"><i class="fas fa-edit"></i>&nbsp;Modifier</a>
+                                <a href="{{ url_for('supprimer_reclamation', id=reclamation[6]) }}" class="btn-delete" onclick="return confirm('Êtes-vous sûr ?')"><i class="fas fa-trash-alt"></i>&nbsp;Supprimer</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script>
+
+        $(document).ready(function() {
+            $('#myTable').DataTable();
+        });
+
+        function toggleDrawer() {
+            document.getElementById('drawer').classList.toggle('open');
+        }
+    </script>
+
+</body>
+</html>

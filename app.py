@@ -26,11 +26,15 @@ def se_connecter():
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM utilisateurs WHERE login = %s AND mot_de_passe = %s", (login, password))
         user = cur.fetchone()
+        agence_id = user[5]
+        cur.execute("SELECT nom_agence FROM agences WHERE agences.id = %s", (agence_id,))
+        user_agence = cur.fetchone()
         cur.close()
 
         if user:
             if user[6] == "agent":
                 session['userlogin'] = login
+                session['entite'] = user_agence[0]
                 session['user_id'] = user[0]
                 return redirect(url_for('index'))
             elif user[6] == "admin":
@@ -54,14 +58,60 @@ def index():
     else:
         if 'adminlogin' in session:
             return redirect(url_for('index_admin'))
-    login = session['userlogin']
     cur = mysql.connection.cursor()
-    cur.execute("SELECT numero, objet, canal, date_saisie, date_ext, etat_demande, id FROM reclamations WHERE login = %s",
-                (login,))
-    reclamations = cur.fetchall()
+
+    cur.execute("""
+            SELECT total_reclamations, top_etats, top_entites, created_at
+            FROM reclamation_summary
+            ORDER BY created_at DESC
+            LIMIT 1
+        """)
+    row = cur.fetchone()
+
+    total = row[0] if row else 0
+    top_etats = json.loads(row[1]) if row and row[1] else []
+    top_entites = json.loads(row[2]) if row and row[2] else []
+    created_at = row[3] if row else None
+
     cur.close()
 
-    return render_template('index.html', reclamations=reclamations)
+    return render_template(
+        'index.html',
+        userlogin=session['userlogin'],
+        total=total,
+        top_etats=top_etats,
+        top_entites=top_entites,
+        created_at=created_at
+    )
+
+
+@app.route('/Mes_reclamations')
+def Mes_reclamations():
+    if 'userlogin' not in session and 'adminlogin' not in session:
+        return redirect(url_for('se_connecter'))
+    else:
+        if 'adminlogin' in session:
+            login = session['adminlogin']
+            cur = mysql.connection.cursor()
+            cur.execute(
+                "SELECT numero, objet, canal, date_saisie, date_ext, etat_demande, id FROM reclamations WHERE login = %s",
+                (login,))
+            reclamations = cur.fetchall()
+            cur.close()
+
+            return render_template('Mes_reclamations.html', reclamations=reclamations, login=login)
+
+        else:
+            if 'userlogin' in session:
+                login = session['userlogin']
+                cur = mysql.connection.cursor()
+                cur.execute("SELECT numero, objet, canal, date_saisie, date_ext, etat_demande, id FROM reclamations WHERE login = %s",
+                            (login,))
+                reclamations = cur.fetchall()
+                cur.close()
+
+                return render_template('Mes_reclamations.html', reclamations=reclamations, login=login)
+
 
 @app.route('/index_admin')
 def index_admin():
@@ -390,7 +440,13 @@ def ajouter():
         numero = request.form['numero']
         canal = request.form['canal']
         sous_reclamation = request.form.get('sous_reclamation', '')
-        login = request.form['login']
+        if 'userlogin' in session:
+            login = session['userlogin']
+        elif 'adminlogin' in session:
+            login = session['adminlogin']
+        else:
+            return redirect(url_for('se_connecter'))
+        entite = request.form['entite']
         cause_reclamation = request.form['cause_reclamation']
         contact = request.form['contact']
         etat_demande = request.form.get('etat_demande')
@@ -430,10 +486,20 @@ def ajouter():
 
         cur.execute("""
             INSERT INTO reclamations
-            (numero, canal, objet, login, etat_demande, cause_reclamation, contact, date_saisie, date_prevue_vid, date_ext)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            (numero, canal, objet, login, entite, etat_demande, cause_reclamation, contact, date_saisie, date_prevue_vid, date_ext)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
-            numero, canal, objet_libelle, login, etat_demande, cause_reclamation, contact,
+            numero, canal, objet_libelle, login, entite, etat_demande, cause_reclamation, contact,
+            date_saisie.strftime('%Y-%m-%d %H:%M:%S'),
+            date_pre_vid.strftime('%Y-%m-%d %H:%M:%S'),
+            date_ext.strftime('%Y-%m-%d %H:%M:%S')
+        ))
+        cur.execute("""
+                    INSERT INTO reclamations_cached
+                    (numero, canal, objet, login, entite, etat_demande, cause_reclamation, contact, date_saisie, date_prevue_vid, date_ext)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+            numero, canal, objet_libelle, login, entite, etat_demande, cause_reclamation, contact,
             date_saisie.strftime('%Y-%m-%d %H:%M:%S'),
             date_pre_vid.strftime('%Y-%m-%d %H:%M:%S'),
             date_ext.strftime('%Y-%m-%d %H:%M:%S')
@@ -441,7 +507,7 @@ def ajouter():
 
         mysql.connection.commit()
         cur.close()
-        return redirect(url_for('index'))
+        return redirect(url_for('Mes_reclamations'))
 
 
     cur = mysql.connection.cursor()
@@ -579,13 +645,15 @@ def modifier_reclamation(id):
 
 @app.route('/supprimer_reclamation/<int:id>')
 def supprimer_reclamation(id):
-    if 'userlogin' not in session:
+    if 'userlogin' not in session and 'adminlogin' not in session:
         return redirect(url_for('se_connecter'))
-    cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM reclamations WHERE id = %s", (id,))
-    mysql.connection.commit()
-    cur.close()
-    return redirect(url_for('index'))
+    else:
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE FROM reclamations WHERE id = %s", (id,))
+        cur.execute("DELETE FROM reclamations_cached WHERE id = %s", (id,))
+        mysql.connection.commit()
+        cur.close()
+        return redirect(url_for('Mes_reclamations'))
 
 @app.template_filter('datetimeformat')
 def datetimeformat(value, format='%Y-%m-%d %H:%M:%S'):
@@ -1025,7 +1093,7 @@ def reclamations():
     q = request.args.get('q', '').strip()
     return render_template('reclamations.html', q=q)
 
-# API لجلب النتائج بشكل JSON حسب الصفحة والبحث
+
 @app.route('/api/reclamations')
 def api_reclamations():
     page = int(request.args.get('page', 1))

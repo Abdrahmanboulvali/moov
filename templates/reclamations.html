@@ -38,7 +38,7 @@
     <br />
     <div class="main-content">
         <h1 align="center">Liste des Réclamations</h1>
-        <br />
+        <br>
 
         <form id="search-form">
             <input type="text" id="search-input" name="q" placeholder="Rechercher..." value="{{ q or '' }}" pattern="\d*" inputmode="numeric" />
@@ -164,7 +164,7 @@
     </script>
     <script>
 document.getElementById('search-input').addEventListener('input', function(e) {
-    this.value = this.value.replace(/\D/g, '');  // إزالة كل شيء غير الأرقام
+    this.value = this.value.replace(/\D/g, '');
 });
 </script>
 

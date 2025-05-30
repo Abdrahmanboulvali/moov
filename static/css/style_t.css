@@ -46,19 +46,20 @@ header.shift {
     transform: translateX(240px); /* يتحرك مع القائمة الجانبية */
 }
 
-/* === القائمة الجانبية (Drawer) === */
 .drawer {
     width: 240px;
     background-color: #ff6f00;
     color: black;
-    height: 100vh;
+    height: calc(100vh - 60px); /* لأن الهيدر بارتفاع 60px */
+    overflow: hidden; /* منع التمرير العام */
     position: fixed;
-    top: 60px; /* لأن الهيدر بارتفاع 60px */
+    top: 60px;
     left: -240px;
     z-index: 1000;
-    padding-top: 25px;
     transition: left 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
     box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
 }
 
 .drawer.open {
@@ -66,12 +67,21 @@ header.shift {
     box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
 }
 
+.drawer h2 {
+    padding: 20px;
+    margin: 0;
+    flex-shrink: 0; /* ثابت */
+}
+
 .drawer ul {
     list-style: none;
     padding: 0;
     margin: 0;
+    overflow-y: auto; /* ✅ تفعيل التمرير */
+    flex-grow: 1;      /* خذ المساحة المتبقية */
 }
 
+/* العناصر داخل القائمة */
 .drawer li {
     padding: 15px 30px;
     font-weight: 500;
@@ -80,7 +90,7 @@ header.shift {
     transition: background-color 0.25s ease, transform 0.2s ease;
 }
 
-
+/* الروابط داخل القائمة */
 .drawer a {
     color: inherit;
     text-decoration: none;
@@ -89,15 +99,19 @@ header.shift {
     transition: color 0.2s ease;
 }
 
+/* التأثيرات عند التحويم والاختيار */
 .drawer a:hover,
 .drawer a.active {
     background-color: rgba(255, 255, 255, 0.1);
     color: white;
     border-left: 4px solid #fff;
 }
+
+/* تحريك المحتوى الرئيسي عند فتح القائمة */
 .drawer.open ~ .main-content {
     margin-left: 240px;
 }
+
 .main-content {
     transition: margin-left 0.3s ease-in-out;
 }
