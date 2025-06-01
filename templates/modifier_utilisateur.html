@@ -39,6 +39,10 @@
             <input type="text" name="nom" id="nom" value="{{ utilisateur[2] }}" required>
         </div>
         <div>
+            <label for="numero_tel">Numéro de téléphone</label>
+            <input type="number" name="numero_tel" id="numero_tel" value="{{ utilisateur[9] }}" required>
+        </div>
+        <div>
             <label for="sexe">Sexe</label>
             <select name="sexe" id="sexe" required>
                 <option value="Homme" {% if utilisateur[3] == 'Homme' %}selected{% endif %}>Homme</option>

@@ -41,6 +41,7 @@
                 <tr>
                     <th>Prénom</th>
                     <th>Nom</th>
+                    <th>Numéro de téléphone</th>
                     <th>Sexe</th>
                     <th>Login</th>
                     <th>Rôle</th>
@@ -53,10 +54,11 @@
                 <tr>
                     <td>{{ user[1] }}</td>  <!-- prénom -->
                     <td>{{ user[2] }}</td>  <!-- nom -->
+                    <td>{{ user[6] }}</td>
                     <td>{{ user[3] }}</td>  <!-- sexe -->
                     <td>{{ user[4] }}</td>  <!-- login -->
                     <td>{{ user[5] }}</td>
-                    <td>{{ user[6] }}</td>
+                    <td>{{ user[7] }}</td>
                     <td>
                         {% if user[4] == session['adminlogin'] or user[5] != 'admin' %}
                             <a href="{{ url_for('modifier_utilisateur_admin', user_id=user[0]) }}" class="btn-edit">

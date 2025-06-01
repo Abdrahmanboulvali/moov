@@ -155,7 +155,7 @@ def utilisateurs():
     session.pop('previous_page', None)
     cur = mysql.connection.cursor()
     cur.execute("""
-        SELECT u.id, u.prenom, u.nom, u.sexe, u.login, u.role, a.nom_agence
+        SELECT u.id, u.prenom, u.nom, u.sexe, u.login, u.role, u.numero_tel, a.nom_agence
         FROM utilisateurs u
         LEFT JOIN agences a ON u.agence_id = a.id
     """)
@@ -171,6 +171,7 @@ def ajouter_utilisateur():
     if request.method == 'POST':
         prenom = request.form['prenom']
         nom = request.form['nom']
+        numero_tel = request.form['numero_tel']
         sexe = request.form['sexe']
         login = request.form['login']
         mot_de_passe = request.form['mot_de_passe']
@@ -178,9 +179,9 @@ def ajouter_utilisateur():
         role = request.form['role']
 
         cur.execute("""
-            INSERT INTO utilisateurs (prenom, nom, sexe, login, mot_de_passe, role, agence_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (prenom, nom, sexe, login, mot_de_passe, role, agence_id))
+            INSERT INTO utilisateurs (prenom, nom, numero_tel, sexe, login, mot_de_passe, role, agence_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (prenom, nom, numero_tel, sexe, login, mot_de_passe, role, agence_id))
 
         mysql.connection.commit()
         cur.close()
@@ -356,6 +357,7 @@ def modifier_utilisateur(id):
     if request.method == 'POST':
         prenom = request.form['prenom']
         nom = request.form['nom']
+        numero_tel = request.form['numero_tel']
         sexe = request.form['sexe']
         login = request.form['login']
         password = request.form['password']
@@ -366,9 +368,9 @@ def modifier_utilisateur(id):
             return redirect(request.url)
         cur.execute("""
             UPDATE utilisateurs 
-            SET prenom=%s, nom=%s, sexe=%s, login=%s
+            SET prenom=%s, nom=%s, numero_tel=%s, sexe=%s, login=%s
             WHERE id=%s
-        """, (prenom, nom, sexe, login, id))
+        """, (prenom, nom, numero_tel, sexe, login, id))
         mysql.connection.commit()
         cur.close()
         flash("Modifications enregistrées avec succès.", "success")
